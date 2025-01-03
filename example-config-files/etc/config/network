@@ -1,0 +1,121 @@
+
+config interface 'loopback'
+	option device 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config device
+	option name 'br-lan'
+	option type 'bridge'
+	option ipv6 '0'
+	option bridge_empty '1'
+	option stp '1'
+	list ports 'eth0'
+	list ports 'eth1'
+	list ports 'eth2'
+	list ports 'eth3'
+	list ports 'eth4'
+	list ports 'eth5'
+	list ports 'eth6'
+	list ports 'eth7'
+	list ports 'eth8'
+	list ports 'eth9'
+	list ports 'eth10'
+	list ports 'eth11'
+	option igmp_snooping '1'
+
+config device
+	option type 'bridge'
+	option name 'br-guest'
+	option stp '1'
+	option ipv6 '0'
+	option bridge_empty '1'
+	option igmp_snooping '1'
+
+config device
+	option type 'bridge'
+	option name 'br-iot'
+	option stp '1'
+	option ipv6 '0'
+	option bridge_empty '1'
+	option igmp_snooping '1'
+
+config device
+	option type 'bridge'
+	option name 'br-dmz'
+	option stp '1'
+	option ipv6 '0'
+	option bridge_empty '1'
+	option igmp_snooping '1'
+
+config interface 'lan'
+	option device 'br-lan.90'
+	option proto 'static'
+	option ipaddr '192.168.1.1'
+	option netmask '255.255.255.0'
+	option ipv6 '0'
+	option delegate '0'
+
+config interface 'guest'
+	option proto 'static'
+	option device 'br-lan.100'
+	option ipaddr '192.168.2.1'
+	option netmask '255.255.255.0'
+	option ipv6 '0'
+	option delegate '0'
+
+config interface 'iot'
+	option proto 'static'
+	option device 'br-lan.110'
+	option ipaddr '192.168.3.1'
+	option netmask '255.255.255.0'
+	option ipv6 '0'
+	option delegate '0'
+
+config interface 'wan'
+	option proto 'pppoe'
+	option ipv6 '0'
+	option username 'user'
+	option password 'pass'
+	option delegate '0'
+	option device 'br-lan.2'
+
+config bridge-vlan
+	option device 'br-lan'
+	option vlan '2'
+	list ports 'eth5:t'
+	list ports 'eth8:t'
+
+config bridge-vlan
+	option device 'br-lan'
+	option vlan '90'
+	list ports 'eth0'
+	list ports 'eth1'
+	list ports 'eth5:t'
+
+config bridge-vlan
+	option device 'br-lan'
+	option vlan '100'
+	list ports 'eth2'
+	list ports 'eth5:t'
+
+config bridge-vlan
+	option device 'br-lan'
+	option vlan '110'
+	list ports 'eth3'
+	list ports 'eth5:t'
+	list ports 'eth6'
+	list ports 'eth7'
+	list ports 'eth9'
+	list ports 'eth10'
+	list ports 'eth11'
+
+config bridge-vlan
+	option device 'br-lan'
+	option vlan '120'
+	list ports 'eth4'
+	list ports 'eth5:t'
+
+
+

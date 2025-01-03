@@ -1,0 +1,125 @@
+
+config dnsmasq
+	option domainneeded '1'
+	option localise_queries '1'
+	option rebind_protection '1'
+	option rebind_localhost '1'
+	option local '/lan/'
+	option domain 'lan'
+	option expandhosts '1'
+	option cachesize '10000'
+	option authoritative '1'
+	option readethers '1'
+	option leasefile '/tmp/dhcp.leases'
+	option localservice '1'
+	option ednspacket_max '1232'
+	option sequential_ip '1'
+	option allservers '1'
+	llist server '8.8.8.8'
+	list server '8.8.4.4'
+	option dhcpleasemax '760'
+	list interface 'dmz'
+	list interface 'guest'
+	list interface 'iot'
+	list interface 'lan'
+	list notinterface 'wan'
+	option doh_backup_noresolv '-1'
+	option noresolv '1'
+
+config odhcpd 'odhcpd'
+	option maindhcp '0'
+	option leasefile '/tmp/hosts/odhcpd'
+	option leasetrigger '/usr/sbin/odhcpd-update'
+	option loglevel '4'
+
+config dhcp 'lan'
+	option interface 'lan'
+	option start '64'
+	option limit '190'
+	option leasetime '24h'
+	option dhcpv4 'server'
+
+config dhcp 'guest'
+	option interface 'guest'
+	option start '64'
+	option limit '190'
+	option leasetime '24h'
+
+config dhcp 'iot'
+	option interface 'iot'
+	option start '64'
+	option limit '190'
+	option leasetime '24h'
+
+config dhcp 'dmz'
+	option interface 'dmz'
+	option start '64'
+	option limit '190'
+	option leasetime '24h'
+
+config dhcp 'wan'
+	option interface 'wan'
+	option ignore '1'
+
+config domain
+	option name 'router1'
+	option ip '192.168.1.1'
+
+
+config host
+	option name 'router1'
+	list mac '00:0A:52:09:59:26'
+	option ip '192.168.1.1'
+	option leasetime 'infinite'
+
+config host
+	option mac 'AA:BB:CC:DD:EE:FF'
+	option dns '1'
+	option name 'sonos1'
+	option ip '192.168.3.16'
+	option leasetime '24h'
+
+config host
+	option mac 'AA:AA:CC:DD:EE:FF'
+	option dns '1'
+	option name 'sonos2'
+	option ip '192.168.3.17'
+	option leasetime '24h'
+
+config host
+	option mac 'AA:CC:CC:DD:EE:FF'
+	option dns '1'
+	option name 'sonos3'
+	option ip '192.168.3.18'
+	option leasetime '24h'
+
+config host
+	option mac 'AA:DD:CC:DD:EE:FF'
+	option dns '1'
+	option name 'sonos4'
+	option ip '192.168.3.19'
+	option leasetime '24h'
+
+config host
+	option mac 'AA:EE:CC:DD:EE:FF'
+	option dns '1'
+	option name 'sonos5'
+	option ip '192.168.3.20'
+	option leasetime '24h'
+
+config host
+	option mac 'AA:FF:CC:DD:EE:FF'
+	option dns '1'
+	option name 'sonos6'
+	option ip '192.168.3.21'
+	option leasetime '24h'
+
+config host
+	option mac 'AA:BB:AA:DD:EE:FF'
+	option dns '1'
+	option name 'sonos7'
+	option ip '192.168.3.22'
+	option leasetime '24h'
+
+
+

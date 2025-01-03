@@ -1,0 +1,7 @@
+
+config samba
+	option workgroup 'WORKGROUP'
+	option charset 'UTF-8'
+	option description 'Virtual OWRT Router1'
+	option interface 'iot lan'
+
