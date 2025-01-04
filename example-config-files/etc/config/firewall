@@ -69,7 +69,7 @@ config rule
 	list dest_ip '224.0.0.0/4'
 
 config rule
-	option name 'Deny-Multicast-WAN-to-Internal'
+	option name 'Deny-Multicast-All-Zones-to-WAN'
 	option family 'ipv4'
 	option src 'wan'
 	option dest '*'
