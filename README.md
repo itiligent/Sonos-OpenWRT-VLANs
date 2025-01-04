@@ -458,3 +458,14 @@ config rule
 This config was tested on 3rd Jan 2025 with the latest available Sonos application & firmware. The Sonos application, airplay, device discovery & even new device setup works fine from either LAN or Guest VLAN.
 Please submit an issue or a suggestion if you find there's anything missed or no longer working as Sonos continues evolve their products.
 
+### For hybrid or legacy Sonos S1 & S2 users:
+For device discovery, S1 & S2 require SSDP (uses same UDP 5353 same as mDNS, but quite different) & brodcast UDP on 6969.
+A potential (not fully tested) hybrid solution lies with the addition of this python script: 
+https://github.com/alsmith/multicast-relay 
+
+Run the script from rc.local with these switches
+```
+-homebrewNetifaces --ifNameStructLen=32 --noMDNS --interfaces br-lan br-iot br-guest
+``` 
+All above firewall settings should work ok with this script.
+
