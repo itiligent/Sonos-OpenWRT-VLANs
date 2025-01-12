@@ -16,10 +16,11 @@ Sonos has shifted from a **LAN-first** to a **cloud-first** architecture, which 
 
 A fully functional Sonos system working across VLANs with OpenWRT requires the following components:  
 
-- **🔄 An mDNS System**: Avahi is installed by default in OpenWRT.
+- **🔄 An mDNS System**: Avahi is typically installed by default in OpenWRT.
 - **📡 IGMP Snooping**: To efficiently manage multicast traffic.  
-- **🌐 IGMP Multicast Proxying**: To forward multicast traffic between VLANs.  
-- **🛡️ Various firewall rules to**:  
+- **🌐 IGMP Multicast Proxying**: To forward multicast traffic between VLANs.
+- **📥 ICMP between Sonos devices, router interfaces & controller**: Facilitates various timing & background communications
+- **🛡️ Various TCP & UDP firewall & proxy rules to**:  
   - Securely direct multicast traffic   
   - Forward Sonos unicast traffic between VLANs 
 ---
@@ -29,17 +30,17 @@ These [example config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tr
 
 ### **Example VLANs**  
 1. **LAN VLAN**:  
-   - The trusted network where the Sonos controller application will operate from.  
+   - The trusted network where the Sonos controller application will operate from.
    - This VLAN will be considered the **"Upstream"** network for IGMP proxying.  
 2. **Guest VLAN** (optional):  
-   - Semi-trusted network for guests also using a Sonos application.  
+   - Trusted network for guests also using a Sonos application.
    - Also considered an **"Upstream"** network for IGMP proxying.  
 3. **IOT VLAN**:  
    - The untrusted VLAN for IOT devices.
    - Considered the **"Downstream"** network for IGMP proxying.
 
 ### **Assumptions**  
-- VLANS for LAN, Guest & IOT have been pre-created on a **bridge device**.
+- VLANS for LAN, Guest & IOT have been pre-created on a **DSA bridge device**. (OpenWRT 21.02 and above)
 - LAN, Guest & IOT network interfaces have been configured with the their appropriate VLAN & static IP.  
 - WAN access is available to all VLANs.
 - Sonos devices are using **static IP addresses** (static dhcp reservations are recommended).
@@ -54,7 +55,11 @@ The `igmpproxy` package must be installed for proxying of multicast traffic betw
 opkg update
 opkg install igmpproxy
 ```
-_**Warning on muticast proxy:** Sonos device discovery requires SSDP relay across router interfaces, but because SSDP also shares a multicast addresess with the broader uPnP suite, opening up the firewall for SSDP creates potential for other uPnP traffic to punch holes all over your network, especially if uPnP can reach the WAN interface. It is therefore stronly recommended to **remove/disable any Universal Plug & Play packages present**. If legacy uPnP is a requirement, you must restrict uPnP very carefully. [See OpenWRT's uPnP warning here.](https://openwrt.org/docs/guide-user/firewall/upnp/start)_
+**Warning with muticast proxy:** 
+
+Sonos device discovery requires SSDP relay across router interfaces, **_however IGMPproxy disables SSDP relay by default because it shares the same multicast address (239.255.255.250) with the broader uPnP suite._** As such, be advised that without properly restricting multicast, there is potential for all other uPnP traffic to punch holes everywhere (especially if uPnP can reach the WAN interface!). This guide shows how to remove the default IGMPproxy restriction and **_safely allow SSDP relay_** between just the LAN, GUEST & IOT VLANs.
+
+It is strongly recommended to include all firewall rules below as a baseline minimum. You should also **remove/disable any Universal Plug & Play packages present**. If legacy uPnP is a requirement, you may need to further restrict uPnP very carefully as required. [See OpenWRT's uPnP warning here.](https://openwrt.org/docs/guide-user/firewall/upnp/start)_
 
 ---
 
@@ -221,7 +226,7 @@ config rule
 ### **Step 4: Add Sonos-Specific Firewall Rules**  
 Add the following to `/etc/config/firewall`:  
 
-Because all router input & forwarding will be locked down by default, with addition blocking of all multicast to/from/through the WAN interface, simpler multicast catch-all rules to address range 224.0.0.0/4 can be used internally. This catch all also allows for easier discovery of other non-Sonos devices placed in the IOT VLAN.
+Because all router input & forwarding will be locked down by default, with the addition of blocking of all multicast to/from/through the WAN interface, simpler multicast catch-all rules to address range 224.0.0.0/4 can be used internally. These catch all rules also allow for any other non-Sonos device discovery that relies on mDNS, SSDP or multicast. For all other devices you will simply need to research TCP & UDP traffic requirements from trusted to IOT, and in reverse from IOT - > trusted in a similar pattern to the provided Sonos rules.
 
 ```plaintext
 config rule
@@ -373,7 +378,7 @@ config phyint
 
 ### **Step 6: Patch the IGMPproxy Launch Script**
 
-For security, the default igmpproxy launch script blocks UDP uPnP traffic to 239.255.255.250. However, Sonos SSDP device discovery across VLANs also uses this same address.  _**Warning: Removing this restriction poses a significant security risk if uPnP package(s) are present**_. 
+For security, the default igmpproxy launch script blocks UDP uPnP traffic to 239.255.255.250. However, Sonos SSDP device discovery also uses this same address.  _**Warning: Removing this default restriction poses a significant security risk if uPnP package(s) are present or firewall rules any less restrictive than those provided are not already in place.**_
 
 To lift this restriction, replace the `/etc/init.d/igmpproxy` script with the patched version linked below:
 
@@ -383,7 +388,7 @@ _In future OpenWRT versions it may be possible to toggle this uPnP script restri
 
 ---
 
-### **Step 7: Configure Avahi for mDNS** (& Airplay)
+### **Step 7: Configure Avahi for mDNS & Apple Airplay discovery**
 Edit `/etc/avahi/avahi-daemon.conf` as follows:  
 _Note: The `allow-interfaces` directive must be used to limit which interfaces will be allowed to proxy mDNS multicast._
 
@@ -420,7 +425,7 @@ For optional SMB music library file sharing _**from the OpenWRT router itself**_
 
 See [this Youtube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for sharing a usb drvie with OpenWRT. 
 
-For those using a virtual instance of OpenwWRT on x86, you can optionally create a separate ext4 formatted vdisk and mount it via fstab. An updated firmware image can then be built with the new fstab included so music storage will be persistent across sysupgrades or SquashFS firmware resets.    
+For those using a virtual instance of OpenwWRT on x86, you can optionally create a separate ext4 formatted vdisk and mount it via fstab. Build and install a new firmware image with the new fstab included to ensure music storage will be persistent across upgrades or even SquashFS firmware resets.    
 ```
 opkg install luci-app-samba4 samba4-server wsdd2
 ```
@@ -463,7 +468,7 @@ config rule
 ```
 
 ## 🛠️ For hybrid or legacy Sonos S1 & S2 users:
-The above configuration is not tested with older S1 & S2 Sonos applications (these utilise ICMP, broadcast on UDP 6969 and SSDP on UDP 5353 - different to mDNS on 5353). However, all above firewall settings account for this and should work ok. (Anyone with S1/S2 firmware please confirm or document any observed bugs in the 'issues' section).    
+The above configuration is not tested with older S1 & S2 Sonos applications (these utilise ICMP, broadcast on UDP 6969 and SSDP on UDP 5353 - different to mDNS on 5353). However, the above firewall are built to account for this and should work ok. (Anyone with S1/S2 firmware please confirm or document any observed bugs in the 'issues' section).    
 
 The above config was last tested on 5th Jan 2025 with the latest available Sonos S80 application & firmware. The Sonos application, Airplay, device discovery & even new device setup works fine from either the LAN or Guest VLAN.
 Please submit an issue or a suggestion if you find there's anything missed or no longer working as Sonos continues evolve their products.
