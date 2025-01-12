@@ -51,10 +51,19 @@ These [example config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tr
 ### **Step 1: Install IGMPproxy** 
 The `igmpproxy` package must be installed for proxying of multicast traffic between VLANs
 
+For 23.05.5 or lower:
 ```bash
 opkg update
-opkg install igmpproxy
+opkg install 
 ```
+
+For 24.10 and above:
+
+```bash
+apk update
+apk add igmpproxy
+```
+
 **Warning with muticast proxy:** 
 
 Sonos device discovery requires SSDP relay across router interfaces, **_however IGMPproxy disables SSDP relay by default because it shares the same multicast address (239.255.255.250) with the broader uPnP suite._** As such, be advised that without properly restricting multicast, there is potential for all other uPnP traffic to punch holes everywhere (especially if uPnP can reach the WAN interface!). This guide shows how to remove the default IGMPproxy restriction and **_safely allow SSDP relay_** between just the LAN, GUEST & IOT VLANs.
