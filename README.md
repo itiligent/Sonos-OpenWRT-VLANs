@@ -59,7 +59,7 @@ opkg install igmpproxy
 
 Sonos device discovery requires SSDP relay across router interfaces, **_however IGMPproxy disables SSDP relay by default because it shares the same multicast address (239.255.255.250) with the broader uPnP suite._** As such, be advised that without properly restricting multicast, there is potential for all other uPnP traffic to punch holes everywhere (especially if uPnP can reach the WAN interface!). This guide shows how to remove the default IGMPproxy restriction and **_safely allow SSDP relay_** between just the LAN, GUEST & IOT VLANs.
 
-It is strongly recommended to include all firewall rules below as a baseline minimum. You should also **remove/disable any Universal Plug & Play packages present**. If legacy uPnP is a requirement, you may need to further restrict uPnP very carefully as required. [See OpenWRT's uPnP warning here.](https://openwrt.org/docs/guide-user/firewall/upnp/start)_
+It is strongly recommended to include all firewall rules below as a baseline minimum. You should also **remove/disable any Universal Plug & Play packages present**. If legacy uPnP is a requirement, you may need to further restrict uPnP very carefully as required. [See OpenWRT's uPnP warning here.](https://openwrt.org/docs/guide-user/firewall/upnp/start)
 
 ---
 
@@ -83,7 +83,7 @@ config device
 ---
 
 ### **Step 3: Configure Firewall Defaults**  
-To secure all traffic (and to avoid spamming multicast everywhere), all _**input**_ traffic to the router & _**forwarding**_ between zones must be denied. To implement this change without breaking things, the below configuration achieves this whilst still allowing LUCI access, SSH, DNS, DHCP & ICMP to the router. This step forms the secure foundation to build further explicit firewall rules around.  
+To secure all traffic (and to avoid spamming multicast everywhere), all _**input**_ traffic to the router & _**forwarding**_ between zones must first be denied. To implement this change without breaking things, the below configuration achieves this whilst still allowing LUCI access, SSH, DNS, DHCP & ICMP to the router. This step forms the secure foundation to build further explicit firewall rules around.  
 
 Edit `/etc/config/firewall` to restrict traffic input to the router as follows:  
 
@@ -226,7 +226,8 @@ config rule
 ### **Step 4: Add Sonos-Specific Firewall Rules**  
 Add the following to `/etc/config/firewall`:  
 
-Because all router input & forwarding will be locked down by default, with the addition of blocking of all multicast to/from/through the WAN interface, simpler multicast catch-all rules to address range 224.0.0.0/4 can be used internally. These catch all rules also allow for any other non-Sonos device discovery that relies on mDNS, SSDP or multicast. For all other devices you will simply need to research TCP & UDP traffic requirements from trusted to IOT, and in reverse from IOT - > trusted in a similar pattern to the provided Sonos rules.
+Because all router input, forwarding and multicast to/from/through the WAN interface is to be blocked, simpler catch-all rules to allow the entire multicast (224.0.0.0/4) block internally can be used. This way, all device discovery that relies on mDNS, SSDP or multicast in any form can be easily supported with just the incremental addition of unicast firewall rules relevant to each device. (For non-Sonos devces, research the traffic requirements from trusted -> IOT, and in reverse from IOT -> trusted, then update the firewall as needed.)
+
 
 ```plaintext
 config rule
@@ -467,9 +468,28 @@ config rule
 	option src 'iot'
 ```
 
-## 🛠️ For hybrid or legacy Sonos S1 & S2 users:
-The above configuration is not tested with older S1 & S2 Sonos applications (these utilise ICMP, broadcast on UDP 6969 and SSDP on UDP 5353 - different to mDNS on 5353). However, the above firewall are built to account for this and should work ok. (Anyone with S1/S2 firmware please confirm or document any observed bugs in the 'issues' section).    
 
-The above config was last tested on 5th Jan 2025 with the latest available Sonos S80 application & firmware. The Sonos application, Airplay, device discovery & even new device setup works fine from either the LAN or Guest VLAN.
-Please submit an issue or a suggestion if you find there's anything missed or no longer working as Sonos continues evolve their products.
+
+## 🛠️ For hybrid, legacy S1 & S2 or desktop app users:
+**S1 & S2** 
+- Should work fine, but not tested. Older S1 & S2 Sonos applications utilise ICMP, broadcast on UDP 6969 and SSDP on UDP 5353 and the above firewall rules support this. 
+
+**Desktop App:** 
+- This app is slowly being deprecated by Sonos, and relies on udp broadcast/255.255.255.255 for discovery therefore the above solution will not work. Some form of broadcast relay is needed, perhaps installing socat will work. (See below, not tested). 
+```
+config socat 'sonos_bcast_forward'
+    option enable '1'
+    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast,fork udp4-sendto:192.168.3.255:1900'
+    option user 'nobody'
+```
+
+## Tracking of Changes
+The Sonos ecosystem is evolving and may change agains in future. The above config was last tested on 12th Jan 2025 with the latest available Sonos S80 application & firmware 100% working with all features. (Sonos controller IOS/Android application, Airplay, device discovery & new device setup working perfectly from either LAN or Guest VLANs.) 
+
+
+Please submit an issue or a suggestion if you find there's anything missed or not working.
+
+
+
+
 
