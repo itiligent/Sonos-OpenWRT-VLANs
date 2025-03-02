@@ -48,8 +48,8 @@ These [example config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tr
 
 ## 🚀 **Step-by-Step Configuration**  
 
-### **Step 1: Install IGMPproxy** 
-The `igmpproxy` package must be installed for proxying of multicast traffic between VLANs
+### **Step 1: Install IGMPproxy & Socat** 
+The `igmpproxy` & `socat` packages are needed to proxy specific traffic between VLANs
 
 For OpenwWRT 23.05.5 or lower:
 ```bash
@@ -443,7 +443,33 @@ rlimit-nproc=3
 ```
 ---
 
-### **Step 8: [Optional] Samba Music Library Share** 
+
+
+---
+
+
+## Step 8: Sonos Desktop Application & Legacy S1/S2 App Support
+### Desktop Appliction:
+- **Apple OS**:	The above guide should work fine thanks to Bonjour/Avahi being used for discovery, which is allowed by the above (not tested).
+- **Windows**:  Because the Windows version rather crudely relies only on UDP 1900 broadcasts to 255.255.255.255 for Sonos discovery, these broadcasts must relayed by the following steps..
+
+Adjust and copy the following to `/etc/config/socat` 
+
+```
+config socat 'sonos_bcast_forward'
+    option enable '1'
+    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast,fork udp4-sendto:192.168.3.255:1900' # Adjust ip address to the broadcast address of the IOT VLAN
+    option user 'nobody'
+```
+
+Restart Socat with `/etc/init.d/socat restart` or from Luci "Startup" page.
+
+### Legacy Sonos S1 & S2 Apps:
+- The above guide should work fine with either Android or Apple IOS because S1 & S2 both utilise ICMP, UDP 6969 and UDP 5353 which are all allowed by the above firewall rules (not tested).  
+
+---
+
+### **Step 9: [Optional] Samba Music Library Share** 
 Because a router is typically always on, music library file sharing _**from the OpenWRT router itself**_ offeres a very simple & low-power approach to keeping your music collection always online. To achieve this, additionally install the Samba & WSDD2 packages and see [this Youtube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for sharing a usb drive with Samba & OpenWRT. 
 
 ```
@@ -495,28 +521,7 @@ config rule
 
 If using a virtual instance of OpenwWRT on x86, a very robust approach for adding a persistent file storage to OpenWRT is to create a separate EXT4 formatted vdisk and auto mount it via `/etc/fstab`. For auto mount & vdisk file share persistence across firmware resets or firmware upgrades, create a new firmware image with the updated `/etc/fstab` file baked in as a customised default via this useful script: https://github.com/itiligent/Easy-OpenWRT-Builder.     
 
-
 ---
-
-
-**Sonos Desktop Application:** 
-- Apple OS:	The above guide should work fine thanks to Bonjour/Avahi being used for discovery, which is allowed by the above (not tested).
-- Windows:  	Because the Windows version rather crudely relies on UDP 1900 broadcasts to 255.255.255.255 for Sonos discovery, therefore these broadcasts must relayed by the following steps
-
-Adjust and copy the following to `/etc/config/socat` 
-
-```
-config socat 'sonos_bcast_forward'
-    option enable '1'
-    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast,fork udp4-sendto:192.168.3.255:1900' # Adjust ip address to the broadcast address of the IOT VLAN
-    option user 'nobody'
-```
-
-Restart Socat with `/etc/init.d/socat restart` or from Luci "Startup" page.
-
-## 🛠️ Legacy Sonos S1 & S2 App Users:
-- The above guide should work fine with either Android or Apple IOS because S1 & S2 both utilise ICMP, UDP 6969 and UDP 5353 which are all allowed by the above firewall rules (not tested).  
-
 
 ## Future Sonos Changes?
 
