@@ -50,7 +50,7 @@ config device
 	option igmp_snooping '1'
 
 config interface 'lan'
-	option device 'br-lan.90'
+	option device 'br-lan.100'
 	option proto 'static'
 	option ipaddr '192.168.1.1'
 	option netmask '255.255.255.0'
@@ -59,7 +59,7 @@ config interface 'lan'
 
 config interface 'guest'
 	option proto 'static'
-	option device 'br-lan.100'
+	option device 'br-lan.200'
 	option ipaddr '192.168.2.1'
 	option netmask '255.255.255.0'
 	option ipv6 '0'
@@ -67,42 +67,28 @@ config interface 'guest'
 
 config interface 'iot'
 	option proto 'static'
-	option device 'br-lan.110'
+	option device 'br-lan.300'
 	option ipaddr '192.168.3.1'
 	option netmask '255.255.255.0'
 	option ipv6 '0'
 	option delegate '0'
 
-config interface 'wan'
-	option proto 'pppoe'
-	option ipv6 '0'
-	option username 'user'
-	option password 'pass'
-	option delegate '0'
-	option device 'br-lan.2'
-
 config bridge-vlan
 	option device 'br-lan'
-	option vlan '2'
-	list ports 'eth5:t'
-	list ports 'eth8:t'
-
-config bridge-vlan
-	option device 'br-lan'
-	option vlan '90'
+	option vlan '100'
 	list ports 'eth0'
 	list ports 'eth1'
 	list ports 'eth5:t'
 
 config bridge-vlan
 	option device 'br-lan'
-	option vlan '100'
+	option vlan '200'
 	list ports 'eth2'
 	list ports 'eth5:t'
 
 config bridge-vlan
 	option device 'br-lan'
-	option vlan '110'
+	option vlan '300'
 	list ports 'eth3'
 	list ports 'eth5:t'
 	list ports 'eth6'
@@ -111,11 +97,7 @@ config bridge-vlan
 	list ports 'eth10'
 	list ports 'eth11'
 
-config bridge-vlan
-	option device 'br-lan'
-	option vlan '120'
-	list ports 'eth4'
-	list ports 'eth5:t'
+
 
 
 

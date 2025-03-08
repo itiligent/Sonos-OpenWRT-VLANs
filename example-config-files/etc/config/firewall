@@ -1,6 +1,6 @@
 
 config defaults
-	option input 'REJECT'
+	option input 'REJECT' 
 	option output 'ACCEPT'
 	option forward 'REJECT'
 	option synflood_protect '1'
@@ -28,7 +28,6 @@ config zone
 	option output 'ACCEPT'
 	option forward 'REJECT'
 	list network 'iot'
-	option log '1'
 
 config zone
 	option name 'wan'
@@ -52,6 +51,23 @@ config forwarding
 	option src 'iot'
 	option dest 'wan'
 
+
+config rule
+	option name 'Deny-ICMP-from-WAN' 
+	option family 'ipv4'
+	option src 'wan'
+	option proto 'icmp'
+	option target 'DROP'
+	list icmp_type 'echo-request'
+
+config rule
+	option name 'Allow-ICMP-Everywhere'
+	option family 'ipv4'
+	option target 'ACCEPT'
+	list proto 'icmp'
+	option src '*'
+	option dest '*'
+
 config rule
 	option name 'Deny-ICMP-from-WAN'
 	option family 'ipv4'
@@ -69,7 +85,7 @@ config rule
 	list dest_ip '224.0.0.0/4'
 
 config rule
-	option name 'Deny-Multicast-All-Zones-to-WAN'
+	option name 'Deny-Multicast-WAN-to-Internal'
 	option family 'ipv4'
 	option src 'wan'
 	option dest '*'
@@ -78,7 +94,7 @@ config rule
 	list dest_ip '224.0.0.0/4'
 
 config rule
-	option name 'Deny-Multicast-Internal-to-WAN'
+	option name 'Deny-Multicast-All-Zones-to-WAN'
 	option family 'ipv4'
 	list proto 'udp'
 	option target 'DROP'
@@ -108,126 +124,6 @@ config rule
 	list proto 'udp'
 	option src 'iot'
 	option dest_port '53'
-	option target 'ACCEPT'
-
-config rule
-	option name 'Allow-Router-SMB-LAN'
-	option family 'ipv4'
-	option dest_port '445 5355 3702'
-	option target 'ACCEPT'
-	option src 'lan'
-
-config rule
-	option name 'Allow-Router-SMB-IOT'
-	option family 'ipv4'
-	option dest_port '445 5355 3702'
-	option target 'ACCEPT'
-	option src 'iot'
-
-config rule
-	option name 'Allow-Luci-SSH-LAN'
-	option family 'ipv4'
-	list proto 'tcp'
-	option src 'lan'
-	option dest_port '22 80'
-	option target 'ACCEPT'
-
-config rule
-	option name 'Allow-Multicast-LAN'
-	option family 'ipv4'
-	option target 'ACCEPT'
-	option src 'lan'
-	list proto 'udp'
-	list dest_ip '224.0.0.0/4'
-
-config rule
-	option name 'Allow-Multicast-IOT'
-	option family 'ipv4'
-	option target 'ACCEPT'
-	option src 'iot'
-	list proto 'udp'
-	list dest_ip '224.0.0.0/4'
-
-config rule
-	option name 'Allow-Multicast-GUEST'
-	option family 'ipv4'
-	option target 'ACCEPT'
-	option src 'guest'
-	list proto 'udp'
-	list dest_ip '224.0.0.0/4'
-
-config rule
-	option name 'Allow-Sonos-from-LAN'
-	option family 'ipv4'
-	option src 'lan'
-	option dest 'iot'
-	option target 'ACCEPT'
-	list dest_ip 'your.sonos.ip.range/29'
-	list proto 'all'
-	list dest_ip 'your.sonos.ip.range/29'
-
-config rule
-	option name 'Allow-Sonos-from-Guest'
-	option family 'ipv4'
-	option src 'guest'
-	option dest 'iot'
-	option target 'ACCEPT'
-	list proto 'all'
-	list dest_ip 'your.sonos.ip.range/29'
-
-config rule
-	option name 'Allow-Sonos-TCP-to-LAN'
-	option family 'ipv4'
-	option src 'iot'
-	option dest 'lan'
-	option target 'ACCEPT'
-	list proto 'tcp'
-	option src_port '445 3445 1400 1433 3400 3401 3500 4070 4444'
-	list src_ip '192.168.3.16/29'
-
-config rule
-	option name 'Allow-Sonos-TCP-to-GUEST'
-	option family 'ipv4'
-	option src 'iot'
-	option dest 'guest'
-	option target 'ACCEPT'
-	list proto 'tcp'
-	option src_port '445 3445 1400 1433 3400 3401 3500 4070 4444'
-	list src_ip '192.168.3.16/29'
-
-config rule
-	option name 'Allow-Sonos-UDP-to-LAN'
-	option family 'ipv4'
-	list proto 'udp'
-	option src 'iot'
-	option dest 'lan'
-	option target 'ACCEPT'
-	option dest_port '319 320 1900 1901 2869 5353 6969 10280-10284 30000-65535'
-	list src_ip '192.168.3.16/29'
-
-config rule
-	option name 'Allow-Sonos-UDP-to-GUEST'
-	option family 'ipv4'
-	list proto 'udp'
-	option src 'iot'
-	option dest 'lan'
-	option target 'ACCEPT'
-	option dest_port '319 320 1900 1901 2869 5353 6969 10280-10284 30000-65535'
-	list src_ip '192.168.3.16/29'
-
-config rule
-	option name 'Allow-ICMP-Everywhere'
-	option family 'ipv4'
-	option target 'ACCEPT'
-	list proto 'icmp'
-	option src '*'
-	option dest '*'
-
-config rule
-	option name 'Allow-ICMP-Router'
-	option family 'ipv4'
-	list proto 'icmp'
-	option src '*'
 	option target 'ACCEPT'
 
 config rule
@@ -266,13 +162,140 @@ config rule
 	option target 'ACCEPT'
 
 config rule
-	option name 'Allow-DHCP-DMZ'
+	option name 'Allow-Luci-SSH-LAN'
 	option family 'ipv4'
-	list proto 'udp'
-	option src 'dmz'
-	option src_port '68'
-	option dest_port '67'
+	list proto 'tcp'
+	option src 'lan'
+	option dest_port '22 80'
 	option target 'ACCEPT'
 
+config rule
+	option name 'Allow-ICMP-Router'
+	option family 'ipv4'
+	list proto 'icmp'
+	option src '*'
+	option target 'ACCEPT'
 
+config rule
+	option name 'Allow-ICMP-Everywhere'
+	option family 'ipv4'
+	option target 'ACCEPT'
+	list proto 'icmp'
+	option src '*'
+	option dest '*'
 
+config rule
+	option name 'Allow-Multicast-LAN'
+	option family 'ipv4'
+	option target 'ACCEPT'
+	option src 'lan'
+	list proto 'udp'
+	list dest_ip '224.0.0.0/4'
+
+config rule
+	option name 'Allow-Multicast-IOT'
+	option family 'ipv4'
+	option target 'ACCEPT'
+	option src 'iot'
+	list proto 'udp'
+	list dest_ip '224.0.0.0/4'
+
+config rule
+	option name 'Allow-Multicast-GUEST'
+	option family 'ipv4'
+	option target 'ACCEPT'
+	option src 'guest'
+	list proto 'udp'
+	list dest_ip '224.0.0.0/4'
+
+config rule
+	option name 'Allow-Sonos-from-LAN'
+	option family 'ipv4'
+	option src 'lan'
+	option dest 'iot'
+	option target 'ACCEPT'
+	list proto 'all'
+	list dest_ip 'sonos.static.ip.range/29'
+
+config rule
+	option name 'Allow-Sonos-from-Guest'
+	option family 'ipv4'
+	option src 'guest'
+	option dest 'iot'
+	option target 'ACCEPT'
+	list proto 'all'
+	list dest_ip 'sonos.static.ip.range/29'
+
+config rule
+	option name 'Allow-Sonos-TCP-to-LAN'
+	option family 'ipv4'
+	option src 'iot'
+	option dest 'lan'
+	option target 'ACCEPT'
+	list proto 'tcp'
+	option src_port '445 3445 1400 1433 3400 3401 3500 4070 4444'
+	list src_ip 'sonos.static.ip.range/29'
+
+config rule
+    option name 'Allow-Sonos-TCP-LAN-Desktop-App'
+    list proto 'tcp'
+    option src 'iot'
+    option dest 'lan'
+    option dest_port '3400'
+    option target 'ACCEPT'
+    option family 'ipv4'
+	list src_ip 'sonos.static.ip.range/29'
+
+config rule
+	option name 'Allow-Sonos-TCP-to-GUEST'
+	option family 'ipv4'
+	option src 'iot'
+	option dest 'guest'
+	option target 'ACCEPT'
+	list proto 'tcp'
+	option src_port '445 3445 1400 1433 3400 3401 3500 4070 4444'
+	list src_ip 'sonos.static.ip.range/29'
+
+config rule
+    option name 'Allow-Sonos-TCP-GUEST-Desktop-App'
+    list proto 'tcp'
+    option src 'iot'
+    option dest 'guest'
+    option dest_port '3400'
+    option target 'ACCEPT'
+    option family 'ipv4'
+	list src_ip 'sonos.static.ip.range/29'
+
+config rule
+	option name 'Allow-Sonos-UDP-to-LAN'
+	option family 'ipv4'
+	list proto 'udp'
+	option src 'iot'
+	option dest 'lan'
+	option target 'ACCEPT'
+	option dest_port '319 320 1900 1901 2869 5353 6969 10280-10284 30000-65535'
+	list src_ip 'sonos.static.ip.range/29'
+
+config rule
+	option name 'Allow-Sonos-UDP-to-GUEST'
+	option family 'ipv4'
+	list proto 'udp'
+	option src 'iot'
+	option dest 'lan'
+	option target 'ACCEPT'
+	option dest_port '319 320 1900 1901 2869 5353 6969 10280-10284 30000-65535'
+	list src_ip 'sonos.static.ip.range/29'
+
+config rule
+	option name 'Allow-Router-SMB-LAN'
+	option family 'ipv4'
+	option dest_port '445 5355 3702'
+	option target 'ACCEPT'
+	option src 'lan'
+
+config rule
+	option name 'Allow-Router-SMB-IOT'
+	option family 'ipv4'
+	option dest_port '445 5355 3702'
+	option target 'ACCEPT'
+	option src 'iot'

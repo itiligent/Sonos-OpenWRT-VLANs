@@ -1,6 +1,5 @@
 config igmpproxy
 	option quickleave 1
-#	option verbose [0-3](none, minimal[default], more, maximum)
 
 config phyint
 	option network lan
