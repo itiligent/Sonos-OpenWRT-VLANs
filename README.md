@@ -160,7 +160,7 @@ config forwarding
 	option dest 'wan'
 ```
 
-Now block ICMP and multicast to and from WAN, also _**explicitly**_ re-enabling LAN access to Luci, SSH, DNS, DHCP & ICMP to the router. Copy after the above forwarding section in the EXACT ORDER shown:
+Now block ICMP and multicast to and from WAN, and in the same step _**explicitly**_ re-enable LAN access to Luci, SSH, DNS, DHCP & ICMP to the router. Copy after the above forwarding section in the EXACT ORDER shown below:
 ```plaintext
 config rule
 	option name 'Deny-ICMP-from-WAN'  #  Place at top of firewall rules
