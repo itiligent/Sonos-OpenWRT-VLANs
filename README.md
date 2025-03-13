@@ -105,7 +105,7 @@ config device
 
 **Warning: Don't commit any changes or restart OpenWRT until all step 3 changes are completed or you may cut yourself off!!**
 
-To correctly restrict insecure uPnP multicast, all _**input traffic**_ to the router & all _**forwarding traffic**_ between zones must first be denied by default. This change overrides several hidden built-in default firewall rules, therefore these must be manually re-created to _**explicitly**_ enable LUCI http, SSH, DNS, DHCP & ICMP to the router. This very important step underpins best practice of _**implicitly deny everything by default**_, and _**explicitly permit only what is needed**_.  
+To correctly restrict insecure uPnP multicast, all _**input traffic**_ to the router & all _**forwarding traffic**_ between zones must first be denied by default. This change overrides several hidden built-in default firewall rules, therefore these must be manually re-created to _**explicitly**_ enable LUCI http, SSH, DNS, DHCP & ICMP to the router. This very important step underpins best practice of _**implicitly deny everything by default**_, and _**explicitly permit only what traffic is needed**_.  
 
 Edit `/etc/config/firewall` as follows:
 
