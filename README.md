@@ -285,8 +285,8 @@ Only reboot OpenWRT after all above changes are saved.
 
 ### **Step 4: Explicitly Allow All Multicast Only between LAN, GUEST & IOT VLANs**  
 
-Because step 3 added multicast restrictions to and from the WAN interface, simpler catch-all rules for the full multicast block (224.0.0.0/4) can be used internally. 
-This RFC1112 block strategy keeps fireall rules managable, and also supports cross-VLAN multicast for other devices that use mDNS or similar for network discovery. 
+Because step 3 added multicast restrictions to and from the WAN interface, simpler catch-all rules for the full multicast block (224.0.0.0/4) can now be used internally. 
+This RFC1112 block strategy keeps firewall rules managable, and also supports cross-VLAN multicast for any other devices that use mDNS or similar for network discovery. 
 
 Add the following to `/etc/config/firewall` directly below the rules from step 3:  
 
