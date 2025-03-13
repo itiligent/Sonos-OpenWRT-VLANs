@@ -320,7 +320,7 @@ config rule
 
 ### **Step 5: Explicitly Allow Sonos Unicast Traffic**  
 
-Add the following to `/etc/config/firewall` directly below the rules from step 4. To keep firewall rules simple, it is optimal to assign all Sonos devices a consecutive static IP range that falls inside a single CIDR bit boundary. Adjust your address range as needed: 
+Add the following to `/etc/config/firewall` directly below the rules from step 4. To keep firewall rules simple, it is optimal to assign all Sonos devices a consecutive static IP range that falls inside a single CIDR bit boundary. Adjust the `list_dest_ip` and `list_src_ip` lines as needed: 
 
 ```plaintext
 config rule
@@ -405,8 +405,8 @@ config rule
 ---
 
 ### **Step 6: Configure IGMPproxy**  
-Edit `/etc/config/igmpproxy` to configure the **upstream & downstream networks** that will be allowed to proxy multicast:  
-_Note: `list altnet` should be used to restrict igmpproxy to just the desired internal networks. Don't use 0.0.0.0/0!_ 
+Edit `/etc/config/igmpproxy` to configure the **upstream & downstream networks** that will be allowed to proxy multicast traffic:  
+_Note: `list altnet` must be used to restrict igmpproxy to just the desired internal networks. Don't use 0.0.0.0/0!_ 
 ```plaintext
 config igmpproxy
 	option quickleave 1
@@ -475,7 +475,7 @@ rlimit-nproc=3
 
 ## Step 9: Extra Application Support
 ### Sonos Desktop Appliction (Windws version):
-This version additionally relies on UDP 1900 broadcasts to 255.255.255.255, therfore broadcasts must relayed by Socat as follows:
+The Windows controller application additionally relies on UDP 1900 broadcasts to 255.255.255.255, therefore these broadcasts must also relayed by Socat as follows:
 
 Adjust and copy the following to `/etc/config/socat` 
 
@@ -488,8 +488,8 @@ config socat 'sonos_bcast_forward'
 
 Restart Socat with `/etc/init.d/socat restart` or from Luci "Startup" page.
 
-- **Apple OS Desktop App**: Should work fine witout Socat thanks to Bonjour/Avahi being used for discovery.
-- **Legacy Sonos S1 & S2**: Either Android or Apple IOS should work fine with the same above firewall rules.  
+- **Apple OS Desktop App**: Should work fine without Socat thanks to Bonjour/Avahi being used for discovery.
+- **Legacy Sonos S1 & S2**: Either Android or Apple IOS should work fine with without Socat.  
 
 ---
 
@@ -548,7 +548,7 @@ config rule
 ```
 
 ### **Step 11: [Optional] Additional Persistent Disk Storage**
-If using a virtual instance of OpenwWRT on x86, a very robust approach for adding a persistent file storage to OpenWRT is to create a separate EXT4 formatted vdisk and auto mount it via `/etc/fstab`. For auto mount & vdisk file share persistence across firmware resets or firmware upgrades, create a new firmware image with the updated `/etc/fstab` file baked in as a customised default via this useful script: https://github.com/itiligent/Easy-OpenWRT-Builder.     
+If using a virtual instance of OpenwWRT on x86, a very robust approach for adding a persistent music storage to OpenWRT is to create a separate EXT4 formatted vdisk and auto mount it via `/etc/fstab`. For auto mount & vdisk file share persistence across firmware resets or firmware upgrades, create a new firmware image with the updated `/etc/fstab` file baked in as a customised default via this useful script: https://github.com/itiligent/Easy-OpenWRT-Builder.     
 
 ---
 
