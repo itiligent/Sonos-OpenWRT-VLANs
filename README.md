@@ -1,6 +1,6 @@
 # 🎵 **How to configure Sonos with VLANs & OpenWRT (2025)**
 
-### Configuring OpenWRT VLANs for the new Sonos architecture (introduced late 2024)  
+### Configuring OpenWRT VLANs for the new Sonos architecture
 
 As of late 2024, much online documentation on configuring VLANs for Sonos is somewhat outdated due to several recent changes to the Sonos network architecture.  
 
@@ -57,9 +57,9 @@ These [example config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tr
 
 **Unrestricted multicast of uPnP traffic poses significant security risks, especially if allowed to reach the WAN interface**.
 
-Be advised that Sonos device discovery and various other Sonos communications requires a range of multicast to be relayed across VLAN interfaces. There are security considerations with this due to Sonos sharing the same address blocks used by the broader uPnP suite (239.255.255.250). As such steps must be taken to carefully limit multicast between VLANS, and where possible, legacy Universal Plug & Play packages should be removed or disabled. 
+Be advised that Sonos device discovery and various other Sonos communications requires a range of multicast to be relayed across router interfaces. There are security considerations with this due to Sonos multicast traffic sharing the same address block used by the broader uPnP suite (239.255.255.250). As such, extra steps must be taken to carefully limit multicast. Wherever possible, legacy Universal Plug & Play OpenWRT packages should be removed or disabled. 
 
-This guide explains how to limit all Sonos multicast traffic to just the LAN, GUEST, and IOT VLANs interfaces only. As such it is strongly recommended to apply all firewall rules shown in this guide as a minimum baseline. 
+This guide explains how to limit all Sonos multicast traffic to just the LAN, GUEST, and IOT VLANs interfaces only. As such it is strongly recommended to apply all firewall rules in this guide as a minimum baseline. 
 
 ---
 
@@ -105,7 +105,7 @@ config device
 
 **Warning: Don't commit any changes or restart OpenWRT until all step 3 changes are completed or you may cut yourself off!!**
 
-To correctly restrict insecure uPnP multicast, all _**input traffic**_ to the router & all _**forwarding traffic**_ between zones must first be denied by default. This change overrides several hidden built-in default firewall rules, therefore these must be manually re-created to _**explicitly**_ enable LUCI http, SSH, DNS, DHCP & ICMP to the router. This very important step underpins best practice of _**implicitly deny everything by default**_, and _**explicitly permit only what is needed**_.  
+To correctly restrict insecure uPnP multicast, all _**input traffic**_ to the router & all _**forwarding traffic**_ between zones must first be denied by default. This change overrides several hidden built-in default firewall rules, therefore these must be manually re-created to _**explicitly**_ enable LUCI http, SSH, DNS, DHCP & ICMP to the router. This very important step underpins best practice of _**implicitly deny everything by default**_, and _**explicitly permit only what traffic is needed**_.  
 
 Edit `/etc/config/firewall` as follows:
 
@@ -160,7 +160,7 @@ config forwarding
 	option dest 'wan'
 ```
 
-Now block ICMP and multicast to and from WAN, also _**explicitly**_ re-enabling LAN access to Luci, SSH, DNS, DHCP & ICMP to the router. Copy after the above forwarding section in the EXACT ORDER shown:
+Now block ICMP and multicast to and from WAN, and in the same step _**explicitly**_ re-enable LAN access to Luci, SSH, DNS, DHCP & ICMP to the router. Copy after the above forwarding section in the EXACT ORDER shown below:
 ```plaintext
 config rule
 	option name 'Deny-ICMP-from-WAN'  #  Place at top of firewall rules
@@ -285,8 +285,8 @@ Only reboot OpenWRT after all above changes are saved.
 
 ### **Step 4: Explicitly Allow All Multicast Only between LAN, GUEST & IOT VLANs**  
 
-Because step 3 added multicast restrictions to and from the WAN interface, simpler catch-all rules for the full multicast block (224.0.0.0/4) can be used internally. 
-This RFC1112 block strategy keeps fireall rules managable, and also supports cross-VLAN multicast for other devices that use mDNS or similar for network discovery. 
+Because step 3 added multicast restrictions to and from the WAN interface, simpler catch-all rules for the full multicast block (224.0.0.0/4) can now be used internally. 
+This RFC1112 block strategy keeps firewall rules managable, and also supports cross-VLAN multicast for any other devices that use mDNS or similar for network discovery. 
 
 Add the following to `/etc/config/firewall` directly below the rules from step 3:  
 
@@ -323,7 +323,7 @@ config rule
 
 ### **Step 5: Explicitly Allow Sonos Unicast Traffic**  
 
-Add the following to `/etc/config/firewall` directly below the rules from step 4: 
+Add the following to `/etc/config/firewall` directly below the rules from step 4. To keep firewall rules simple, it is optimal to assign all Sonos devices a consecutive static IP range that falls inside a single CIDR bit boundary. Adjust the `list_dest_ip` and `list_src_ip` lines as needed: 
 
 ```plaintext
 config rule
@@ -408,8 +408,8 @@ config rule
 ---
 
 ### **Step 6: Configure IGMPproxy**  
-Edit `/etc/config/igmpproxy` to configure the **upstream & downstream networks** that will be allowed to proxy multicast:  
-_Note: `list altnet` should be used to restrict igmpproxy to just the desired internal networks. Don't use 0.0.0.0/0!_ 
+Edit `/etc/config/igmpproxy` to configure the **upstream & downstream networks** that will be allowed to proxy multicast traffic:  
+_Note: `list altnet` must be used to restrict igmpproxy to just the desired internal networks. Don't use 0.0.0.0/0!_ 
 ```plaintext
 config igmpproxy
 	option quickleave 1
@@ -478,7 +478,7 @@ rlimit-nproc=3
 
 ## Step 9: Extra Application Support
 ### Sonos Desktop Appliction (Windws version):
-This version additionally relies on UDP 1900 broadcasts to 255.255.255.255, therfore broadcasts must relayed by Socat as follows:
+The Windows controller application additionally relies on UDP 1900 broadcasts to 255.255.255.255, therefore these broadcasts must also relayed by Socat as follows:
 
 Adjust and copy the following to `/etc/config/socat` 
 
@@ -491,8 +491,8 @@ config socat 'sonos_bcast_forward'
 
 Restart Socat with `/etc/init.d/socat restart` or from Luci "Startup" page.
 
-- **Apple OS Desktop App**: Should work fine witout Socat thanks to Bonjour/Avahi being used for discovery.
-- **Legacy Sonos S1 & S2**: Either Android or Apple IOS should work fine with the same above firewall rules.  
+- **Apple OS Desktop App**: Should work fine without Socat thanks to Bonjour/Avahi being used for discovery.
+- **Legacy Sonos S1 & S2**: Either Android or Apple IOS should work fine with without Socat.  
 
 ---
 
@@ -551,7 +551,7 @@ config rule
 ```
 
 ### **Step 11: [Optional] Additional Persistent Disk Storage**
-If using a virtual instance of OpenwWRT on x86, a very robust approach for adding a persistent file storage to OpenWRT is to create a separate EXT4 formatted vdisk and auto mount it via `/etc/fstab`. For auto mount & vdisk file share persistence across firmware resets or firmware upgrades, create a new firmware image with the updated `/etc/fstab` file baked in as a customised default via this useful script: https://github.com/itiligent/Easy-OpenWRT-Builder.     
+If using a virtual instance of OpenwWRT on x86, a very robust approach for adding a persistent music storage to OpenWRT is to create a separate EXT4 formatted vdisk and auto mount it via `/etc/fstab`. For auto mount & vdisk file share persistence across firmware resets or firmware upgrades, create a new firmware image with the updated `/etc/fstab` file baked in as a customised default via this useful script: https://github.com/itiligent/Easy-OpenWRT-Builder.     
 
 ---
 
