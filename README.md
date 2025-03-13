@@ -320,7 +320,7 @@ config rule
 
 ### **Step 5: Explicitly Allow Sonos Unicast Traffic**  
 
-Add the following to `/etc/config/firewall` directly below the rules from step 4: 
+Add the following to `/etc/config/firewall` directly below the rules from step 4. To keep firewall rules simple, it is optimal to assign all Sonos devices a consecutive static IP range that falls inside a single CIDR bit boundary. Adjust your address range as needed: 
 
 ```plaintext
 config rule
