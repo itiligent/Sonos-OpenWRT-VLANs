@@ -1,6 +1,6 @@
 # 🎵 **How to configure Sonos with VLANs & OpenWRT (2025)**
 
-### Configuring OpenWRT VLANs for the new Sonos architecture (introduced late 2024)  
+### Configuring OpenWRT VLANs for the new Sonos architecture
 
 As of late 2024, much online documentation on configuring VLANs for Sonos is somewhat outdated due to several recent changes to the Sonos network architecture.  
 
