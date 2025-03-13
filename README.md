@@ -57,7 +57,7 @@ These [example config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tr
 
 **Unrestricted multicast of uPnP traffic poses significant security risks, especially if allowed to reach the WAN interface**.
 
-Be advised that Sonos device discovery and various other Sonos communications requires a range of multicast to be relayed across router nterfaces. There are security considerations with this due to Sonos multicast traffic sharing the same address block used by the broader uPnP suite (239.255.255.250). As such, extra steps must be taken to carefully limit multicast. Wherever possible, legacy Universal Plug & Play OpenWRT packages should be removed or disabled. 
+Be advised that Sonos device discovery and various other Sonos communications requires a range of multicast to be relayed across router interfaces. There are security considerations with this due to Sonos multicast traffic sharing the same address block used by the broader uPnP suite (239.255.255.250). As such, extra steps must be taken to carefully limit multicast. Wherever possible, legacy Universal Plug & Play OpenWRT packages should be removed or disabled. 
 
 This guide explains how to limit all Sonos multicast traffic to just the LAN, GUEST, and IOT VLANs interfaces only. As such it is strongly recommended to apply all firewall rules in this guide as a minimum baseline. 
 
