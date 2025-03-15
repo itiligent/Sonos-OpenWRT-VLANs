@@ -189,6 +189,7 @@ config rule
 	option family 'ipv4'
 	option target 'ACCEPT'
 	option src 'lan'
+	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
 
@@ -197,6 +198,7 @@ config rule
 	option family 'ipv4'
 	option target 'ACCEPT'
 	option src 'iot'
+	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
 
@@ -205,6 +207,7 @@ config rule
 	option family 'ipv4'
 	option target 'ACCEPT'
 	option src 'guest'
+	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
 

@@ -296,6 +296,7 @@ config rule
 	option family 'ipv4'
 	option target 'ACCEPT'
 	option src 'lan'
+	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
 
@@ -304,6 +305,7 @@ config rule
 	option family 'ipv4'
 	option target 'ACCEPT'
 	option src 'iot'
+	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
 
@@ -312,6 +314,7 @@ config rule
 	option family 'ipv4'
 	option target 'ACCEPT'
 	option src 'guest'
+	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
 ```
@@ -352,13 +355,13 @@ config rule
 	list src_ip 'sonos.static.ip.range/29'
 
 config rule
-        option name 'Allow-Sonos-TCP-LAN-Desktop-App'
-        list proto 'tcp'
-        option src 'iot'
-        option dest 'lan'
-        option dest_port '3400'
-        option target 'ACCEPT'
-        option family 'ipv4'
+	option name 'Allow-Sonos-TCP-LAN-Desktop-App'
+	list proto 'tcp'
+	option src 'iot'
+	option dest 'lan'
+	option dest_port '3400'
+	option target 'ACCEPT'
+	option family 'ipv4'
 	list src_ip 'sonos.static.ip.range/29'
 
 config rule
@@ -372,13 +375,13 @@ config rule
 	list src_ip 'sonos.static.ip.range/29'
 
 config rule
-        option name 'Allow-Sonos-TCP-GUEST-Desktop-App'
-        list proto 'tcp'
-        option src 'iot'
-        option dest 'guest'
-        option dest_port '3400'
-        option target 'ACCEPT'
-        option family 'ipv4'
+	option name 'Allow-Sonos-TCP-GUEST-Desktop-App'
+	list proto 'tcp'
+	option src 'iot'
+	option dest 'guest'
+	option dest_port '3400'
+	option target 'ACCEPT'
+	option family 'ipv4'
 	list src_ip 'sonos.static.ip.range/29'
 
 config rule
@@ -517,14 +520,14 @@ Now add a guest (password-free) music file share at the bottom of `/etc/samba/sm
 
 ```
 [Music]
-        path = /mnt/disk/path
-        create mask = 0666
-        directory mask = 0777
-        read only = yes
-        guest ok = yes
-        vfs objects = io_uring
-        hosts allow = 192.168.1.0/24, 192.168.3.0/24  # Adjust to your LAN & IOT ip network addresses
-        hosts deny = 0.0.0.0/0 # deny everything else
+	path = /mnt/disk/path
+	create mask = 0666
+	directory mask = 0777
+	read only = yes
+	guest ok = yes
+	vfs objects = io_uring
+	hosts allow = 192.168.1.0/24, 192.168.3.0/24  # Adjust to your LAN & IOT ip network addresses
+	hosts deny = 0.0.0.0/0 # deny everything else
 ```
 
 Lastly, add the following Samba firewall rules: 
