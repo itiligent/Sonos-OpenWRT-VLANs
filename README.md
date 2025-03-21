@@ -476,8 +476,8 @@ rlimit-nproc=3
 
 ---
 
-## Step 9: Sonos Desktop Application Support
-### Windows version:
+## Step 9: Sonos Desktop App & Legacy S1/S2 App Support
+### Windows Desktop Application:
 The Windows Desktop controller application additionally relies on UDP 1900 broadcasts to 255.255.255.255 in the controller's network for discovery. From a Desktop Application located in either GUEST or LAN VLAN, these broadcasts can be relayed through to the IOT VLAN broadcast address via Socat as follows:
 
 Adjust and copy the following to `/etc/config/socat` 
@@ -491,9 +491,9 @@ config socat 'sonos_bcast_forward'
 
 Restart Socat with `/etc/init.d/socat restart` or from Luci "Startup" page.
 
-### Apple OS version: 
+### Apple OS Desktop Application 
 Should work fine without Socat thanks to Bonjour/Avahi being used for discovery.
-### Legacy Sonos S1 & S2: 
+### Legacy Sonos S1 & S2 Apps: 
 Either Android or Apple IOS should work fine with without Socat.  
 
 ---
