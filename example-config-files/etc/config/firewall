@@ -240,7 +240,7 @@ config rule
 	list src_ip 'sonos.static.ip.range/29'
 
 config rule
-    option name 'Allow-Sonos-TCP-LAN-Desktop-App'
+    option name 'Allow-Sonos-TCP-to-LAN-Desktop-App'
     list proto 'tcp'
     option src 'iot'
     option dest 'lan'
@@ -260,7 +260,7 @@ config rule
 	list src_ip 'sonos.static.ip.range/29'
 
 config rule
-    option name 'Allow-Sonos-TCP-GUEST-Desktop-App'
+    option name 'Allow-Sonos-TCP-to-GUEST-Desktop-App'
     list proto 'tcp'
     option src 'iot'
     option dest 'guest'
