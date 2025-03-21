@@ -355,7 +355,7 @@ config rule
 	list src_ip 'sonos.static.ip.range/29'
 
 config rule
-	option name 'Allow-Sonos-TCP-LAN-Desktop-App'
+	option name 'Allow-Sonos-TCP-to-LAN-Desktop-App'
 	list proto 'tcp'
 	option src 'iot'
 	option dest 'lan'
@@ -375,7 +375,7 @@ config rule
 	list src_ip 'sonos.static.ip.range/29'
 
 config rule
-	option name 'Allow-Sonos-TCP-GUEST-Desktop-App'
+	option name 'Allow-Sonos-TCP-to-GUEST-Desktop-App'
 	list proto 'tcp'
 	option src 'iot'
 	option dest 'guest'
@@ -399,7 +399,7 @@ config rule
 	option family 'ipv4'
 	list proto 'udp'
 	option src 'iot'
-	option dest 'lan'
+	option dest 'guest'
 	option target 'ACCEPT'
 	option dest_port '319 320 1900 1901 2869 5353 6969 10280-10284 30000-65535'
 	list src_ip 'sonos.static.ip.range/29'
@@ -476,9 +476,9 @@ rlimit-nproc=3
 
 ---
 
-## Step 9: Extra Application Support
-### Sonos Desktop Appliction (Windws version):
-The Windows controller application additionally relies on UDP 1900 broadcasts to 255.255.255.255, therefore these broadcasts must also relayed by Socat as follows:
+## Step 9: Sonos Desktop App & Legacy S1/S2 App Support
+### Windows Desktop Application:
+The Windows Desktop controller application additionally relies on UDP 1900 broadcasts to 255.255.255.255 in the controller's network for discovery. From a Desktop Application located in either GUEST or LAN VLAN, these broadcasts can be relayed through to the IOT VLAN broadcast address via Socat as follows:
 
 Adjust and copy the following to `/etc/config/socat` 
 
@@ -491,13 +491,15 @@ config socat 'sonos_bcast_forward'
 
 Restart Socat with `/etc/init.d/socat restart` or from Luci "Startup" page.
 
-- **Apple OS Desktop App**: Should work fine without Socat thanks to Bonjour/Avahi being used for discovery.
-- **Legacy Sonos S1 & S2**: Either Android or Apple IOS should work fine with without Socat.  
+### Apple OS Desktop Application 
+Should work fine without Socat thanks to Bonjour/Avahi being used for discovery.
+### Legacy Sonos S1 & S2 Apps: 
+Either Android or Apple IOS should work fine with without Socat.  
 
 ---
 
 ### **Step 10: [Optional] Samba Music Library Share** 
-Because a router is always on, music library file sharing _**from the OpenWRT router itself**_ offeres a low-power approach hosting a music collection 24x7. To achieve this, install the Samba & WSDD2 packages and see [this Youtube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for sharing a usb drive with Samba & OpenWRT. 
+Because a router is typically always on, music library file sharing _**from the OpenWRT router itself**_ offeres a low-power approach to hosting your music collection 24x7. To achieve this, install the Samba & WSDD2 packages and see [this Youtube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for how to share a usb drive via Samba & OpenWRT. 
 
 ```
 opkg update
@@ -551,7 +553,7 @@ config rule
 ```
 
 ### **Step 11: [Optional] Additional Persistent Disk Storage**
-If using a virtual instance of OpenwWRT on x86, a very robust approach for adding a persistent music storage to OpenWRT is to create a separate EXT4 formatted vdisk and auto mount it via `/etc/fstab`. For auto mount & vdisk file share persistence across firmware resets or firmware upgrades, create a new firmware image with the updated `/etc/fstab` file baked in as a customised default via this useful script: https://github.com/itiligent/Easy-OpenWRT-Builder.     
+If using a virtualised instance of OpenwWRT on x86, a robust approach for adding persistent music disk storage to OpenWRT is to create a separate EXT4 formatted vdisk that is auto mounted via `/etc/fstab`. For auto mount & vdisk storage persistence across firmware resets or even firmware upgrades, it is possible to create a custom firmware image with your modified `/etc/fstab` file baked in as the default. This approach ensures the extra EXT4 storage partition is not lost of destroyed upon firmware resets or upgrades. See here for further instructions on resizing and adding additional partitions to OpenWRT: [https://github.com/itiligent/Easy-OpenWRT-Builder](https://github.com/itiligent/Easy-OpenWRT-Builder?tab=readme-ov-file#-persistent-filesystem-expansion-without-resizing-partitions)    
 
 ---
 
