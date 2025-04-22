@@ -284,7 +284,7 @@ config rule
 	option family 'ipv4'
 	list proto 'udp'
 	option src 'iot'
-	option dest 'lan'
+	option dest 'guest'
 	option target 'ACCEPT'
 	option dest_port '319 320 1900 1901 2869 5353 6969 10280-10284 30000-65535'
 	list src_ip 'sonos.static.ip.range/29'
