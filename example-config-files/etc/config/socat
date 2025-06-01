@@ -1,5 +1,5 @@
-
 config socat 'sonos_bcast_forward'
     option enable '1'
-    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast,fork udp4-sendto:192.168.3.255:1900' # Adjust ip address to the broadcast address of the IOT VLAN
+    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast udp4-sendto:192.168.3.255:1900,broadcast'    # Adjust this IP address to the broadcast address of your IOT VLAN
     option user 'nobody'
+

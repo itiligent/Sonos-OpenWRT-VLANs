@@ -51,7 +51,6 @@ config forwarding
 	option src 'iot'
 	option dest 'wan'
 
-
 config rule
 	option name 'Deny-ICMP-from-WAN' 
 	option family 'ipv4'
@@ -218,7 +217,7 @@ config rule
 	option dest 'iot'
 	option target 'ACCEPT'
 	list proto 'all'
-	list dest_ip 'sonos.static.ip.range/29'
+	list dest_ip 'sonos.static.ip.range/29' # update to your range of static IPs used by Sonos speakers
 
 config rule
 	option name 'Allow-Sonos-from-Guest'
@@ -237,7 +236,7 @@ config rule
 	option target 'ACCEPT'
 	list proto 'tcp'
 	option src_port '445 3445 1400 1433 3400 3401 3500 4070 4444'
-	list src_ip 'sonos.static.ip.range/29'
+	list src_ip 'sonos.static.ip.range/29' # update to your range of static IPs used by Sonos speakers
 
 config rule
     option name 'Allow-Sonos-TCP-to-LAN-Desktop-App'
@@ -257,7 +256,7 @@ config rule
 	option target 'ACCEPT'
 	list proto 'tcp'
 	option src_port '445 3445 1400 1433 3400 3401 3500 4070 4444'
-	list src_ip 'sonos.static.ip.range/29'
+	list src_ip 'sonos.static.ip.range/29' # update to your range of static IPs used by Sonos speakers
 
 config rule
     option name 'Allow-Sonos-TCP-to-GUEST-Desktop-App'
@@ -267,7 +266,7 @@ config rule
     option dest_port '3400'
     option target 'ACCEPT'
     option family 'ipv4'
-	list src_ip 'sonos.static.ip.range/29'
+	list src_ip 'sonos.static.ip.range/29' # update to your range of static IPs used by Sonos speakers
 
 config rule
 	option name 'Allow-Sonos-UDP-to-LAN'
@@ -277,7 +276,7 @@ config rule
 	option dest 'lan'
 	option target 'ACCEPT'
 	option dest_port '319 320 1900 1901 2869 5353 6969 10280-10284 30000-65535'
-	list src_ip 'sonos.static.ip.range/29'
+	list src_ip 'sonos.static.ip.range/29' # update to your range of static IPs used by Sonos speakers
 
 config rule
 	option name 'Allow-Sonos-UDP-to-GUEST'
@@ -287,7 +286,7 @@ config rule
 	option dest 'guest'
 	option target 'ACCEPT'
 	option dest_port '319 320 1900 1901 2869 5353 6969 10280-10284 30000-65535'
-	list src_ip 'sonos.static.ip.range/29'
+	list src_ip 'sonos.static.ip.range/29' # update to your range of static IPs used by Sonos speakers
 
 config rule
 	option name 'Allow-Router-SMB-LAN'
