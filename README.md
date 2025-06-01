@@ -456,8 +456,8 @@ use-iff-running=no
 allow-interfaces=br-lan.100,br-lan.200,br-lan.300  # Adapt to your specific VLAN interfaces here
 
 [publish]
-publish-addresses=yes
-publish-hinfo=yes
+publish-addresses=no
+publish-hinfo=no
 publish-workstation=no
 publish-domain=yes
 
@@ -476,16 +476,16 @@ rlimit-nproc=3
 
 ---
 
-## Step 9: Sonos Desktop App & Legacy S1/S2 App Support
+## Step 9: Older Sonos Desktop App & Legacy S1/S2 App Support
 ### Windows Desktop Application:
-The Windows Desktop controller application additionally relies on UDP 1900 broadcasts to 255.255.255.255 in the controller's network for discovery. From a Desktop Application located in either GUEST or LAN VLAN, these broadcasts can be relayed through to the IOT VLAN broadcast address via Socat as follows:
+Older versions of the Windows Desktop controller application relied on UDP 1900 broadcasts to 255.255.255.255 in the controller's network for discovery. From a Desktop Application located in either GUEST or LAN VLAN, these broadcasts can be relayed through to the IOT VLAN broadcast address via Socat as follows. _(Befofre making these changes, test to see if your Desktop application works from LAN to IOT without Socat - later versions seem to work ok just with igmpproxy and rules above)_ :
 
 Adjust and copy the following to `/etc/config/socat` 
 
 ```
 config socat 'sonos_bcast_forward'
     option enable '1'
-    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast,fork udp4-sendto:192.168.3.255:1900' # Adjust ip address to the broadcast address of the IOT VLAN
+    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast udp4-sendto:172.17.11.255:1900,broadcast'  # Adjust to the broadcast address of your IOT VLAN
     option user 'nobody'
 ```
 
