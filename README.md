@@ -456,8 +456,8 @@ use-iff-running=no
 allow-interfaces=br-lan.100,br-lan.200,br-lan.300  # Adapt to your specific VLAN interfaces here
 
 [publish]
-publish-addresses=yes
-publish-hinfo=yes
+publish-addresses=no
+publish-hinfo=no
 publish-workstation=no
 publish-domain=yes
 
@@ -485,7 +485,7 @@ Adjust and copy the following to `/etc/config/socat`
 ```
 config socat 'sonos_bcast_forward'
     option enable '1'
-    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast,fork udp4-sendto:192.168.3.255:1900' # Adjust ip address to the broadcast address of the IOT VLAN
+    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast udp4-sendto:172.17.11.255:1900,broadcast'  # Adjust to the broadcast address of your IOT VLAN
     option user 'nobody'
 ```
 
