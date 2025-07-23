@@ -456,8 +456,8 @@ use-iff-running=no
 allow-interfaces=br-lan.100,br-lan.200,br-lan.300  # Adapt to your specific VLAN interfaces here
 
 [publish]
-publish-addresses=no
-publish-hinfo=no
+publish-addresses=yes
+publish-hinfo=yes
 publish-workstation=no
 publish-domain=yes
 
