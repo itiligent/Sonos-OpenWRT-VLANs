@@ -23,6 +23,7 @@ config device
 	list ports 'eth9'
 	list ports 'eth10'
 	list ports 'eth11'
+    option multicast_querier '0'
 	option igmp_snooping '1'
 
 config device
@@ -31,7 +32,8 @@ config device
 	option stp '1'
 	option ipv6 '0'
 	option bridge_empty '1'
-	option igmp_snooping '1'
+    option multicast_querier '0'	
+    option igmp_snooping '1'
 
 config device
 	option type 'bridge'
@@ -39,7 +41,8 @@ config device
 	option stp '1'
 	option ipv6 '0'
 	option bridge_empty '1'
-	option igmp_snooping '1'
+    option multicast_querier '0'	
+    option igmp_snooping '1'
 
 config device
 	option type 'bridge'
@@ -47,6 +50,7 @@ config device
 	option stp '1'
 	option ipv6 '0'
 	option bridge_empty '1'
+    option multicast_querier '0'
 	option igmp_snooping '1'
 
 config interface 'lan'

@@ -1,65 +1,61 @@
-# 🎵 **How to configure Sonos with VLANs & OpenWRT (2025)**
+# 🎵 **Configure Sonos with VLANs & OpenWRT (2025)**
 
-### Configuring OpenWRT VLANs for the new Sonos architecture
-
-As of late 2024, much online documentation on configuring VLANs for Sonos is somewhat outdated due to several recent changes to the Sonos network architecture.  
-
-Also, Sonos has shifted from a **LAN-first** to a **CLOUD-first** architecture, which introduces some new networking requirements and security concerns. This change of product focus impacts how VLANs should be configured to support:  
+After late 2024, much Sonos VLAN documentation became outdated. Sonos has shifted from a LAN-first to a CLOUD-first model, requiring new VLAN considerations for:
 
 - Device discovery & setup
-- All Sonos controller application types & versions
-- Music streaming
-- Local music library sharing
-- Apple AirPlay connectivity
+- Sonos controller apps (all types/versions)
+- Streaming & local music libraries
+- Apple AirPlay
 
 ---
 
-## 📋 **Key Requirements**  
+## 📋 **Key Setup Requirements**  
 
-A fully functional Sonos system operating over VLANs with OpenWRT requires the following networking components:  
+For reliable Sonos on accross OpenWRT VLANs, you’ll need to establish the following: 
 
-- 🔄 **An mDNS System**: Avahi is typically installed by default in OpenWRT
-- 📡 **IGMP Snooping**: To efficiently manage multicast traffic
-- 🌐 **IGMP Multicast Proxying**: To forward multicast traffic between VLANs
-- 📥 **ICMP between Sonos devices, router & controller**: Facilitates various timing & background communications
-- 📥 **A broadcast forwarding mechanism**: To support the legacy Sonos desktop application
-- 🛡️ **Various TCP & UDP firewall & proxy rules to**:  
-  - _**Securely**_ direct Sonos multicast traffic   
-  - Forward Sonos-specific unicast traffic between VLANs 
-
+- 🔄 mDNS (Avahi, usually included)
+- 📡 IGMP Snooping
+- 🌐 IGMP Multicast Proxy (IGMPproxy)
+- 📥 ICMP between Sonos, router & controllers
+- 📥 Broadcast forwarding (for older legacy desktop app)
+- 🛡️ Firewall/proxy rules to:
+     - Restrict multicast to internal VLANs
+     - Forward Sonos unicast traffic securely
 ---
 
-### 🛠️ **Reference OpenWRT System**  
-These [example config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tree/main/example-config-files) form the example reference system described in this guide.
+### 🛠️ Reference OpenWRT Setup 
 
 ### **Example VLANs**  
 1. **LAN VLAN**:  
-   - This is the trusted network where the Sonos controller application will operate from
-      - This VLAN is the **"Upstream"** network for IGMP proxying
+   - The trusted network with the Sonos controller application
+      - for IGMPproxy, this VLAN is the **"Upstream"** network 
 2. **Guest VLAN** (optional):  
    - Trusted network for guests also using a Sonos application
-      - This VLAN is also an **"Upstream"** network for IGMP proxying
+      -  for IGMPproxy this VLAN is also an **"Upstream"** network
 3. **IOT VLAN**:  
-   - The untrusted VLAN for IOT devices
-      - This VLAN is the **"Downstream"** network for IGMP proxying
+   - The untrusted VLAN for your Sonos speakers and any other IOT devices
+      - for IGMP proxy this VLAN is the **"Downstream"** network
+
+This link provides [companion OpenWRT config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tree/main/example-config-files) that mirror the above VLAN structure and can be adapted to your own system.
 
 ---
 
-### **Assumptions**  
-- OpenWRT 21.02 or above (the newer DSA architecture)
-- VLANS for LAN, Guest & IOT have been pre-created similar to the supplied example comfig files.
-    - LAN, Guest & IOT network interfaces have all been configured with the their appropriate VLAN assigment & static IP.  
+### 🔧 Assumptions
+- OpenWRT 21.x (the newer DSA architecture)
+- VLANS for LAN, Guest & IOT have been pre-created (see supplied comfig files).
 - WAN access is available to all VLANs.
 - Sonos devices are using **static IP addresses** (static dhcp reservations are recommended).
 ---
 
-### **Muticast Proxy Security Warning** 
+### ⚠️ Security Note on Multicast
 
-**Unrestricted multicast of uPnP traffic poses significant security risks, especially if allowed to reach the WAN interface**.
+**Sonos relies on multicast (e.g., 239.255.255.250) which is also used by uPnP.**
 
-Be advised that Sonos device discovery and various other Sonos communications requires a range of multicast to be relayed across router interfaces. There are security considerations with this due to Sonos multicast traffic sharing the same address block used by the broader uPnP suite (239.255.255.250). As such, extra steps must be taken to carefully limit multicast. Wherever possible, legacy Universal Plug & Play OpenWRT packages should be removed or disabled. 
+**This guide shows how to restict uPnP to internal VLANs only.**
 
-This guide explains how to limit all Sonos multicast traffic to just the LAN, GUEST, and IOT VLANs interfaces only. As such it is strongly recommended to apply all firewall rules in this guide as a minimum baseline. 
+**WARNING: Unrestricted multicast or uPnP traffic must not be allowed to the WAN interface. 
+ Also, wherever possible, legacy Universal Plug & Play OpenWRT packages should be removed or disabled.**. 
+
 
 ---
 
@@ -105,7 +101,7 @@ config device
 
 **Warning: Don't commit any changes or restart OpenWRT until all step 3 changes are completed or you may cut yourself off!!**
 
-To correctly restrict insecure uPnP multicast, all _**input traffic**_ to the router & all _**forwarding traffic**_ between zones must first be denied by default. This change overrides several hidden built-in default firewall rules, therefore these must be manually re-created to _**explicitly**_ enable LUCI http, SSH, DNS, DHCP & ICMP to the router. This very important step underpins best practice of _**implicitly deny everything by default**_, and _**explicitly permit only what traffic is needed**_.  
+To securely restrict insecure uPnP multicast, all router input and inter-zone forwarding traffic should be denied by default. This overrides hidden firewall defaults, requiring explicit re-creation of rules for LUCI HTTP, SSH, DNS, DHCP, and ICMP. This enforces the best practice of implicit deny and explicit permit.
 
 Edit `/etc/config/firewall` as follows:
 
@@ -285,8 +281,8 @@ Only reboot OpenWRT after all above changes are saved.
 
 ### **Step 4: Explicitly Allow All Multicast Only between LAN, GUEST & IOT VLANs**  
 
-Because step 3 added multicast restrictions to and from the WAN interface, simpler catch-all rules for the full multicast block (224.0.0.0/4) can now be used internally. 
-This RFC1112 block strategy keeps firewall rules managable, and also supports cross-VLAN multicast for any other devices that use mDNS or similar for network discovery. 
+With WAN multicast already restricted (step 3), a single catch-all rule for 224.0.0.0/4 can now be applied internally. This RFC1112 block simplifies firewall management and enables cross-VLAN multicast for device discovery.
+
 
 Add the following to `/etc/config/firewall` directly below the rules from step 3:  
 
@@ -317,6 +313,7 @@ config rule
 	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
+        list altnet 169.254.0.0/16
 ```
 
 ---
@@ -478,7 +475,7 @@ rlimit-nproc=3
 
 ## Step 9: Older Sonos Desktop App & Legacy S1/S2 App Support
 ### Windows Desktop Application:
-Older versions of the Windows Desktop controller application relied on UDP 1900 broadcasts to 255.255.255.255 in the controller's network for discovery. From a Desktop Application located in either GUEST or LAN VLAN, these broadcasts can be relayed through to the IOT VLAN broadcast address via Socat as follows. _(Befofre making these changes, test to see if your Desktop application works from LAN to IOT without Socat - later versions seem to work ok just with igmpproxy and rules above)_ :
+Older versions of the Windows Desktop controller used UDP 1900 broadcasts to 255.255.255.255 for discovery. From a Desktop in GUEST or the LAN VLAN, these broadcasts can be relayed to the IOT VLAN via Socat. Test before making this change as newer application versions may work with just igmpproxy and the above rules.
 
 Adjust and copy the following to `/etc/config/socat` 
 
@@ -492,9 +489,10 @@ config socat 'sonos_bcast_forward'
 Restart Socat with `/etc/init.d/socat restart` or from Luci "Startup" page.
 
 ### Apple OS Desktop Application 
-Should work fine without Socat thanks to Bonjour/Avahi being used for discovery.
+Socat won't be needed as Apple relies on Bonjour/Avahi for discovery.
+
 ### Legacy Sonos S1 & S2 Apps: 
-Either Android or Apple IOS should work fine with without Socat.  
+Android & Apple apps should work fine without Socat.  
 
 ---
 
@@ -553,13 +551,13 @@ config rule
 ```
 
 ### **Step 11: [Optional] Additional Persistent Disk Storage**
-If using a virtualised instance of OpenwWRT on x86, a robust approach for adding persistent music disk storage to OpenWRT is to create a separate EXT4 formatted vdisk that is auto mounted via `/etc/fstab`. For auto mount & vdisk storage persistence across firmware resets or even firmware upgrades, it is possible to create a custom firmware image with your modified `/etc/fstab` file baked in as the default. This approach ensures the extra EXT4 storage partition is not lost of destroyed upon firmware resets or upgrades. See here for further instructions on resizing and adding additional partitions to OpenWRT: [https://github.com/itiligent/Easy-OpenWRT-Builder](https://github.com/itiligent/Easy-OpenWRT-Builder?tab=readme-ov-file#-persistent-filesystem-expansion-without-resizing-partitions)    
+For OpenWRT on x86, the most reliable way to add persistent music storage is to create a separate EXT4-formatted vdisk and auto-mount it via /etc/fstab. To ensure persistence across firmware resets or upgrades, bake your modified /etc/fstab into a custom firmware image. This prevents the extra EXT4 partition from being lost upon firmware resets or upgrades. See here for more on adding additional partitions to OpenWRT: [https://github.com/itiligent/Easy-OpenWRT-Builder](https://github.com/itiligent/Easy-OpenWRT-Builder?tab=readme-ov-file#-persistent-filesystem-expansion-without-resizing-partitions)    
 
 ---
 
 ## Future Sonos Changes?
 
-The above config was tested on both Android and Apple devices on 8th March 2025 with the current latest available Sonos S80 application & firmware on OpenWRT 23.05.5. All functions at that time were 100% working (Sonos S80 app, Airplay, new device discovery, new device setup, volume control, speaker grouping and Samba music library access all whilst connected to either the LAN VLAN or Guest VLAN). 
+The above config continues to work as at August 2025 with the latest available Sonos S80 application & firmware on OpenWRT 24.10.2 All functions are 100% working (Sonos S80 app, Airplay, new device discovery, new device setup, volume control, speaker grouping and Samba music library access all whilst connected to either the LAN VLAN or Guest VLAN). 
 
 Please submit an issue if you notice something is not working, or share any helpful suggestions.  
 
