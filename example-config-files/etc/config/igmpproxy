@@ -18,3 +18,4 @@ config phyint
 	option zone iot
 	option direction downstream
 	list altnet 192.168.3.0/24
+	list altnet 169.254.0.0/16
