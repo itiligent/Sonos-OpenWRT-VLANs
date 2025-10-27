@@ -33,7 +33,7 @@ For reliable Sonos on accross OpenWRT VLANs, you’ll need to establish the foll
    - Trusted network for guests also using a Sonos application
       -  This VLAN is also an **"Upstream"** network
 3. **IOT VLAN**:  
-   - The untrusted VLAN for your Sonos speakers and any other IOT devices
+   - The untrusted VLAN for your Sonos speakers and other IOT devices
       - This VLAN is the **"Downstream"** network
 
 This link provides [companion OpenWRT config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tree/main/example-config-files) that mirror the above VLAN structure and can be adapted to your own system.
