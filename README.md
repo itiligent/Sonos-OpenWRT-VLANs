@@ -3,7 +3,7 @@
 After late 2024, much Sonos VLAN documentation became outdated. Sonos has shifted from a LAN-first to a CLOUD-first model, requiring new VLAN considerations for:
 
 - Device discovery & setup
-- Sonos controller apps (all types/versions)
+- Sonos controller apps (all platforms & versions)
 - Streaming & local music libraries
 - Apple AirPlay
 
@@ -13,14 +13,14 @@ After late 2024, much Sonos VLAN documentation became outdated. Sonos has shifte
 
 For reliable Sonos on accross OpenWRT VLANs, you’ll need to establish the following: 
 
-- 🔄 mDNS (Avahi, usually included)
+- 🔄 mDNS
 - 📡 IGMP Snooping
-- 🌐 IGMP Multicast Proxy (IGMPproxy)
+- 🌐 IGMP Multicast Proxy
 - 📥 ICMP between Sonos, router & controllers
-- 📥 Broadcast forwarding (for older legacy desktop app)
-- 🛡️ Firewall/proxy rules to:
-     - Restrict multicast to internal VLANs
-     - Forward Sonos unicast traffic securely
+- 📥 Broadcast forwarding (for older legacy desktop apps)
+- 🛡️ Firewall & proxy rules to:
+     - Restrict multicast to only specific internal VLANs
+     - Forward Sonos unicast traffic between VLANs securely
 ---
 
 ### 🛠️ Reference OpenWRT Setup 
