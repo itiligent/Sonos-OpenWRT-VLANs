@@ -1,9 +1,9 @@
-# 🎵 **Configure Sonos with VLANs & OpenWRT (2025)**
+# 🎵 **Configure Sonos with VLANs & OpenWRT (2026)**
 
-After late 2024, much Sonos VLAN documentation became outdated. Sonos has shifted from a LAN-first to a CLOUD-first model, requiring new VLAN considerations for:
+After late 2024 much Sonos networking documentation became outdated as Sonos shifted from a LAN-first to a CLOUD-first model (aka ensh*tification), requiring new VLAN considerations for:
 
 - Device discovery & setup
-- Sonos controller apps (all types/versions)
+- Sonos controller apps (all platforms & versions)
 - Streaming & local music libraries
 - Apple AirPlay
 
@@ -11,16 +11,16 @@ After late 2024, much Sonos VLAN documentation became outdated. Sonos has shifte
 
 ## 📋 **Key Setup Requirements**  
 
-For reliable Sonos on accross OpenWRT VLANs, you’ll need to establish the following: 
+For reliable Sonos across OpenWRT VLANs, you’ll need to establish the following: 
 
-- 🔄 mDNS (Avahi, usually included)
+- 🔄 mDNS
 - 📡 IGMP Snooping
-- 🌐 IGMP Multicast Proxy (IGMPproxy)
-- 📥 ICMP between Sonos, router & controllers
-- 📥 Broadcast forwarding (for older legacy desktop app)
-- 🛡️ Firewall/proxy rules to:
-     - Restrict multicast to internal VLANs
-     - Forward Sonos unicast traffic securely
+- 🌐 IGMP Multicast Proxy
+- 📥 ICMP between Sonos speakers, router & app controllers
+- 📥 Broadcast forwarding (only for legacy desktop controller app)
+- 🛡️ Firewall & IGMPproxy multicast rules to:
+     - Restrict multicast to only specific internal VLANs
+     - Forward Sonos unicast traffic between VLANs securely
 ---
 
 ### 🛠️ Reference OpenWRT Setup 
@@ -28,34 +28,32 @@ For reliable Sonos on accross OpenWRT VLANs, you’ll need to establish the foll
 ### **Example VLANs**  
 1. **LAN VLAN**:  
    - The trusted network with the Sonos controller application
-      - for IGMPproxy, this VLAN is the **"Upstream"** network 
+      - This VLAN is the **"Upstream"** network 
 2. **Guest VLAN** (optional):  
-   - Trusted network for guests also using a Sonos application
-      -  for IGMPproxy this VLAN is also an **"Upstream"** network
+   - Another trusted network for guests to use a Sonos application
+      -  This VLAN is also an **"Upstream"** network
 3. **IOT VLAN**:  
-   - The untrusted VLAN for your Sonos speakers and any other IOT devices
-      - for IGMP proxy this VLAN is the **"Downstream"** network
+   - The untrusted VLAN for your Sonos speakers and other IOT devices
+      - This VLAN is the **"Downstream"** network
 
 This link provides [companion OpenWRT config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tree/main/example-config-files) that mirror the above VLAN structure and can be adapted to your own system.
 
 ---
 
 ### 🔧 Assumptions
-- OpenWRT 21.x (the newer DSA architecture)
-- VLANS for LAN, Guest & IOT have been pre-created (see supplied comfig files).
-- WAN access is available to all VLANs.
-- Sonos devices are using **static IP addresses** (static dhcp reservations are recommended).
+- You are using a recent OpenWRT build (v21.x & above)
+- Your VLANS for LAN, GUEST & IOT are pre-created and ready to start configuring (see supplied config files)
+- WAN access is available to all VLANs
+- Your Sonos speakers are setup using **static IP addresses** (static dhcp reservations are recommended)
 ---
 
-### ⚠️ Security Note on Multicast
+### ⚠️ Security Warning With Sonos & Multicast Proxy
 
-**Sonos relies on multicast (e.g., 239.255.255.250) which is also used by uPnP.**
+**Sonos multicast traffic must not be allowed to reach the WAN interface.**
+ 
+   **Why?**
 
-**This guide shows how to restict uPnP to internal VLANs only.**
-
-**WARNING: Unrestricted multicast or uPnP traffic must not be allowed to the WAN interface. 
- Also, wherever possible, legacy Universal Plug & Play OpenWRT packages should be removed or disabled.**. 
-
+**Sonos uses multicast on the same address used by Universal Plug-n-Play (uPnP) 239.255.255.250. To prevent Sonos multicast proxy from inadvertently allowing uPnP to reach the WAN and punch holes all over your network, this guide shows how to restrict uPnP to only the example LAN, GUEST & IOT VLANs. You may need to adapt this to your own VLAN configuration.**
 
 ---
 
@@ -79,8 +77,8 @@ apk add igmpproxy socat
 
 ---
 
-### **Step 2: Enable IGMP Snooping & STP**  
-To enable IGMP snooping & Spanning Tree Protocol (STP), add the following lines to the LAN, Guest & IOT bridge devices in `/etc/config/network`:  
+### **Step 2: Enable IGMP Snooping & Spanning Tree Protocol**  
+To enable IGMP snooping & STP, add the following lines to the LAN, Guest & IOT bridge devices in `/etc/config/network`:  
 ```plaintext
 option igmp_snooping '1'
 option stp '1'
@@ -101,7 +99,7 @@ config device
 
 **Warning: Don't commit any changes or restart OpenWRT until all step 3 changes are completed or you may cut yourself off!!**
 
-To securely restrict insecure uPnP multicast, all router input and inter-zone forwarding traffic should be denied by default. This overrides hidden firewall defaults, requiring explicit re-creation of rules for LUCI HTTP, SSH, DNS, DHCP, and ICMP. This enforces the best practice of implicit deny and explicit permit.
+To securely restrict insecure uPnP multicast, all router input and inter-zone forwarding traffic should be denied by default. To to this we must override hidden firewall defaults by requiring explicit firewall rules for all traffic such as LUCI HTTP, SSH, DNS, DHCP, and ICMP. This approach enforces a least priviledage approach via implicit deny and explicit permit.
 
 Edit `/etc/config/firewall` as follows:
 
@@ -111,7 +109,6 @@ config defaults
 	option input 'REJECT'  # Prevents implied inputs to the router 
 	option output 'ACCEPT' # Allow outgoing traffic from any zone
 	option forward 'REJECT' # Reject forces explicit firewall rules to be used for forwarding
-	option synflood_protect '1'
 ```
 
 Next, configure each firewall zone to implicitly deny everything to and through the router interface: 
@@ -313,7 +310,7 @@ config rule
 	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
-        list altnet 169.254.0.0/16
+    list altnet 169.254.0.0/16  # this line stops IGMPproxy log noise from link local  
 ```
 
 ---
@@ -475,14 +472,14 @@ rlimit-nproc=3
 
 ## Step 9: Older Sonos Desktop App & Legacy S1/S2 App Support
 ### Windows Desktop Application:
-Older versions of the Windows Desktop controller used UDP 1900 broadcasts to 255.255.255.255 for discovery. From a Desktop in GUEST or the LAN VLAN, these broadcasts can be relayed to the IOT VLAN via Socat. Test before making this change as newer application versions may work with just igmpproxy and the above rules.
+Older versions of the Windows Desktop controller used UDP 1900 broadcasts to 255.255.255.255 for discovery. From a Desktop in LAN or GUEST VLAN, these broadcasts can be relayed to the IOT VLAN via Socat. Test before making this change as newer application versions may work with just igmpproxy and the above rules.
 
-Adjust and copy the following to `/etc/config/socat` 
+Adjust the below to your IOT broadcast IP address and copy the following to `/etc/config/socat` 
 
 ```
 config socat 'sonos_bcast_forward'
     option enable '1'
-    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast udp4-sendto:172.17.11.255:1900,broadcast'  # Adjust to the broadcast address of your IOT VLAN
+    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast udp4-sendto:192.168.3.255:1900,broadcast'  # Adjust to the broadcast address of your IOT VLAN
     option user 'nobody'
 ```
 
@@ -557,7 +554,7 @@ For OpenWRT on x86, the most reliable way to add persistent music storage is to 
 
 ## Future Sonos Changes?
 
-The above config continues to work as at August 2025 with the latest available Sonos S80 application & firmware on OpenWRT 24.10.2 All functions are 100% working (Sonos S80 app, Airplay, new device discovery, new device setup, volume control, speaker grouping and Samba music library access all whilst connected to either the LAN VLAN or Guest VLAN). 
+The above config continues to work as at January 2026 with the current versions of Sonos application & OpenWRT firmware. All functions are 100% working (Sonos app, Airplay, new device discovery, new device setup, volume control, speaker grouping and Samba music library access all whilst connected to either the LAN VLAN or Guest VLAN). 
 
 Please submit an issue if you notice something is not working, or share any helpful suggestions.  
 
