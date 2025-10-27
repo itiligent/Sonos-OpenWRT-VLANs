@@ -41,21 +41,19 @@ This link provides [companion OpenWRT config files](https://github.com/itiligent
 ---
 
 ### 🔧 Assumptions
-- OpenWRT 21.x (the newer DSA architecture)
-- VLANS for LAN, Guest & IOT have been pre-created (see supplied comfig files).
-- WAN access is available to all VLANs.
-- Sonos devices are using **static IP addresses** (static dhcp reservations are recommended).
+- You are using a recent OpenWRT build (v21.x & above)
+- Your VLANS for LAN, GUEST & IOT are pre-created and ready to start configuring (see supplied config files)
+- WAN access is available to all VLANs
+- Your Sonos speakers are setup using **static IP addresses** (static dhcp reservations are recommended)
 ---
 
-### ⚠️ Security Note on Multicast
+### ⚠️ Security Warning With Sonos & Multicast Proxy
 
-**Sonos relies on multicast (e.g., 239.255.255.250) which is also used by uPnP.**
+**Sonos multicast traffic must not be allowed to reach the WAN interface.**
+ 
+   **Why?**
 
-**This guide shows how to restict uPnP to internal VLANs only.**
-
-**WARNING: Unrestricted multicast or uPnP traffic must not be allowed to the WAN interface. 
- Also, wherever possible, legacy Universal Plug & Play OpenWRT packages should be removed or disabled.**. 
-
+**Sonos uses multicast on the same address used by Universal Plug-n-Play (uPnP) 239.255.255.250. To prevent Sonos multicast proxy from inadvertently allowing uPnP to reach the WAN and punch holes all over your network, this guide shows how to restrict uPnP to only the example LAN, GUEST & IOT VLANs. You may neeed to adapt this to your own VLAN configuration.**
 
 ---
 
@@ -101,7 +99,7 @@ config device
 
 **Warning: Don't commit any changes or restart OpenWRT until all step 3 changes are completed or you may cut yourself off!!**
 
-To securely restrict insecure uPnP multicast, all router input and inter-zone forwarding traffic should be denied by default. This overrides hidden firewall defaults, requiring explicit re-creation of rules for LUCI HTTP, SSH, DNS, DHCP, and ICMP. This enforces the best practice of implicit deny and explicit permit.
+To securely restrict insecure uPnP multicast, all router input and inter-zone forwarding traffic should be denied by default. To to this we must override hidden firewall defaults by requiring explicit firewall rules for all traffic such as LUCI HTTP, SSH, DNS, DHCP, and ICMP. This approach enforces a least priviledage approach via implicit deny and explicit permit.
 
 Edit `/etc/config/firewall` as follows:
 
