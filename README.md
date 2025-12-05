@@ -109,7 +109,6 @@ config defaults
 	option input 'REJECT'  # Prevents implied inputs to the router 
 	option output 'ACCEPT' # Allow outgoing traffic from any zone
 	option forward 'REJECT' # Reject forces explicit firewall rules to be used for forwarding
-	option synflood_protect '1'
 ```
 
 Next, configure each firewall zone to implicitly deny everything to and through the router interface: 
