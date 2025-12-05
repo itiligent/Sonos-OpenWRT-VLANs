@@ -479,7 +479,7 @@ Adjust and copy the following to `/etc/config/socat`
 ```
 config socat 'sonos_bcast_forward'
     option enable '1'
-    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast udp4-sendto:172.17.11.255:1900,broadcast'  # Adjust to the broadcast address of your IOT VLAN
+    option SocatOptions '-d -d udp4-recvfrom:1900,broadcast udp4-sendto:192.168.3.255:1900,broadcast'  # Adjust to the broadcast address of your IOT VLAN
     option user 'nobody'
 ```
 
