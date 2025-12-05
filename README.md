@@ -17,8 +17,8 @@ For reliable Sonos on accross OpenWRT VLANs, you’ll need to establish the foll
 - 📡 IGMP Snooping
 - 🌐 IGMP Multicast Proxy
 - 📥 ICMP between Sonos, router & controllers
-- 📥 Broadcast forwarding (for older legacy desktop apps)
-- 🛡️ Firewall & proxy rules to:
+- 📥 Broadcast forwarding (only for legacy desktop controller app)
+- 🛡️ Firewall & IGMPproxy multicast rules to:
      - Restrict multicast to only specific internal VLANs
      - Forward Sonos unicast traffic between VLANs securely
 ---
