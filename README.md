@@ -310,7 +310,7 @@ config rule
 	list proto 'tcp'
 	list proto 'udp'
 	list dest_ip '224.0.0.0/4'
-        list altnet 169.254.0.0/16
+    list altnet 169.254.0.0/16
 ```
 
 ---
