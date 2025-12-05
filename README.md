@@ -472,7 +472,7 @@ rlimit-nproc=3
 
 ## Step 9: Older Sonos Desktop App & Legacy S1/S2 App Support
 ### Windows Desktop Application:
-Older versions of the Windows Desktop controller used UDP 1900 broadcasts to 255.255.255.255 for discovery. From a Desktop in GUEST or the LAN VLAN, these broadcasts can be relayed to the IOT VLAN via Socat. Test before making this change as newer application versions may work with just igmpproxy and the above rules.
+Older versions of the Windows Desktop controller used UDP 1900 broadcasts to 255.255.255.255 for discovery. From a Desktop in LAN or GUEST VLAN, these broadcasts can be relayed to the IOT VLAN via Socat. Test before making this change as newer application versions may work with just igmpproxy and the above rules.
 
 Adjust and copy the following to `/etc/config/socat` 
 
