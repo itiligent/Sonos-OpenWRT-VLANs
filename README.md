@@ -77,8 +77,8 @@ apk add igmpproxy socat
 
 ---
 
-### **Step 2: Enable IGMP Snooping & STP**  
-To enable IGMP snooping & Spanning Tree Protocol (STP), add the following lines to the LAN, Guest & IOT bridge devices in `/etc/config/network`:  
+### **Step 2: Enable IGMP Snooping & Spanning Tree Protocol**  
+To enable IGMP snooping & STP, add the following lines to the LAN, Guest & IOT bridge devices in `/etc/config/network`:  
 ```plaintext
 option igmp_snooping '1'
 option stp '1'
