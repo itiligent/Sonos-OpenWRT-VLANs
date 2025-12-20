@@ -30,7 +30,7 @@ For reliable Sonos accross OpenWRT VLANs, you’ll need to establish the followi
    - The trusted network with the Sonos controller application
       - This VLAN is the **"Upstream"** network 
 2. **Guest VLAN** (optional):  
-   - Trusted network for guests also using a Sonos application
+   - Another trusted network for guests to use a Sonos application
       -  This VLAN is also an **"Upstream"** network
 3. **IOT VLAN**:  
    - The untrusted VLAN for your Sonos speakers and other IOT devices
