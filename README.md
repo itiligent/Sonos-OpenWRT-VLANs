@@ -11,7 +11,7 @@ After late 2024, much Sonos VLAN documentation became outdated. Sonos has shifte
 
 ## 📋 **Key Setup Requirements**  
 
-For reliable Sonos on accross OpenWRT VLANs, you’ll need to establish the following: 
+For reliable Sonos accross OpenWRT VLANs, you’ll need to establish the following: 
 
 - 🔄 mDNS
 - 📡 IGMP Snooping
