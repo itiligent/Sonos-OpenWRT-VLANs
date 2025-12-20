@@ -53,7 +53,7 @@ This link provides [companion OpenWRT config files](https://github.com/itiligent
  
    **Why?**
 
-**Sonos uses multicast on the same address used by Universal Plug-n-Play (uPnP) 239.255.255.250. To prevent Sonos multicast proxy from inadvertently allowing uPnP to reach the WAN and punch holes all over your network, this guide shows how to restrict uPnP to only the example LAN, GUEST & IOT VLANs. You may neeed to adapt this to your own VLAN configuration.**
+**Sonos uses multicast on the same address used by Universal Plug-n-Play (uPnP) 239.255.255.250. To prevent Sonos multicast proxy from inadvertently allowing uPnP to reach the WAN and punch holes all over your network, this guide shows how to restrict uPnP to only the example LAN, GUEST & IOT VLANs. You may need to adapt this to your own VLAN configuration.**
 
 ---
 
