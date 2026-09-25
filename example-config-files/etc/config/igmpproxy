@@ -4,18 +4,18 @@ config igmpproxy
 config phyint
 	option network lan
 	option zone lan
-	option direction downstream
+	option direction upstream
 	list altnet 192.168.1.0/24
 
 config phyint
 	option network guest
 	option zone guest
-	option direction downstream
+	option direction upstream
 	list altnet 192.168.2.0/24
 	
 config phyint
 	option network iot
 	option zone iot
-	option direction upstream
+	option direction downstream
 	list altnet 192.168.3.0/24
 	list altnet 169.254.0.0/16
