@@ -28,13 +28,13 @@ For reliable Sonos across OpenWRT VLANs, you’ll need to establish the followin
 ### **Example VLANs**  
 1. **LAN VLAN**:  
    - The trusted network with the Sonos controller application
-      - This VLAN is the **"Downstream"** network 
+      - This VLAN is the **"Upstream"** network 
 2. **Guest VLAN** (optional):  
    - Another trusted network for guests to use a Sonos application
-      -  This VLAN is also an **"Downstream"** network
+      -  This VLAN is also an **"Upstream"** network
 3. **IOT VLAN**:  
    - The untrusted VLAN for your Sonos speakers and other IOT devices
-      - This VLAN is the **"Upstream"** network
+      - This VLAN is the **"Downstream"** network
 
 This link provides [companion OpenWRT config files](https://github.com/itiligent/Sonos-OpenWRT-VLANs/tree/main/example-config-files) that mirror the above VLAN structure and can be adapted to your own system.
 
@@ -411,19 +411,19 @@ config igmpproxy
 config phyint
 	option network lan
 	option zone lan
-	option direction downstream
+	option direction upstream
 	list altnet 192.168.1.0/24 # Adjust to your LAN network address 
 
 config phyint
 	option network guest
 	option zone guest
-	option direction downstream
+	option direction upstream
 	list altnet 192.168.2.0/24 # Adjust to your Guest network address  
 	
 config phyint
 	option network iot
 	option zone iot
-	option direction upstream
+	option direction downstream
 	list altnet 192.168.3.0/24 # a# Adjust to your IOT network address 
 ```
 
