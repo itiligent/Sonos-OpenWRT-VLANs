@@ -3,7 +3,7 @@
 ### 📋 **Sonos between OpenWRT VLANs needs the following items:** 
 
 - 🔄 Avahi (mDNS)
-- 🌐 IGMProxy
+- 🌐 IGMPProxy
 - 🛡️ A quite specific firewall, mDNS & multicast proxy configuration to:
      - Facilitate Sonos multicast discovery between VLANs
      - Facilitate bi-directional unicast traffic between Speakers & Controller App located in separate VLANs 
