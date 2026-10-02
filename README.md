@@ -8,7 +8,7 @@
      - Facilitate Sonos multicast discovery between VLANs
      - Facilitate bi-directional unicast traffic between Speakers & Controller App located in separate VLANs 
 
-### 🛠️ Sonos Core Networking Needs
+### 🛠️ Core Networking Approach
 
 | Function | Address / port | Multi-VLAN Approach |
 |---|---|---|
