@@ -212,7 +212,7 @@ rlimit-nproc=3
 ---
 
 
-### **Step 5: [Optional] Samba Music Library Share** 
+### **Step 6: [Optional] Samba Music Library Share** 
 Because a router is typically powered on 24/7, hosting your music library **directly from the OpenWrt router** provides a simple, low-power way to keep your collection continuously available on the network.
 
 To set this up, install the **Samba** and **WSDD2** packages, then follow [this YouTube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for instructions on sharing a USB drive through Samba on OpenWrt.
@@ -247,7 +247,7 @@ config rule
         option target 'ACCEPT'
 ```
 
-### **Step 11: [Optional] Additional Persistent Disk Storage**
-For OpenWRT on x86, the most reliable way to add persistent music storage is to create a separate EXT4-formatted vdisk and auto-mount it via /etc/fstab. To ensure persistence across firmware resets or upgrades, bake your modified /etc/fstab into a custom firmware image. This prevents the extra EXT4 partition from being lost upon firmware resets or upgrades. See here for more on adding additional partitions to OpenWRT: [https://github.com/itiligent/Easy-OpenWRT-Builder](https://github.com/itiligent/Easy-OpenWRT-Builder?tab=readme-ov-file#-persistent-filesystem-expansion-without-resizing-partitions)    
+### **Step 7: [Optional] Additional Persistent Disk Storage**
+For OpenWRT on x86, the most reliable way to add persistent music storage is to create a separate EXT4-formatted vdisk and auto-mount it via `/etc/fstab`. To ensure persistence across firmware resets or upgrades, you can bake your modified `/etc/fstab` into a custom firmware image. This permanently sets the extra EXT4 partition in place and prevents it from being lost upon firmware resets or upgrades. See here for more on adding additional partitions to OpenWRT: [https://github.com/itiligent/Easy-OpenWRT-Builder](https://github.com/itiligent/Easy-OpenWRT-Builder?tab=readme-ov-file#-persistent-filesystem-expansion-without-resizing-partitions)    
 
 ---
