@@ -1,0 +1,28 @@
+#!/bin/sh
+# OpenWrt: ensure Linux bridge Wi-Fi ports do not convert multicast to unicast.
+# Workaround for cases where UCI specifies 0 but the runtime setting remains 1.
+
+case "$ACTION" in
+    add|move|bind)
+        (
+            sleep 2
+
+            for p in /sys/class/net/*; do
+                [ -e "$p/phy80211" ] || continue
+
+                f="$p/brport/multicast_to_unicast"
+                [ -w "$f" ] || continue
+
+                if [ "$(cat "$f" 2>/dev/null)" != "0" ]; then
+                    if echo 0 > "$f"; then
+                        logger -t mcast-fix "${p##*/}: multicast_to_unicast -> 0"
+                    else
+                        logger -t mcast-fix "${p##*/}: failed to disable multicast_to_unicast"
+                    fi
+                fi
+            done
+        ) &
+        ;;
+esac
+
+exit 0
