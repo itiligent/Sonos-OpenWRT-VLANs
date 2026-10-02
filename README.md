@@ -65,7 +65,7 @@ apk add samba4-server luci-app-samba4
 
 ### **Step 2: Setup Firewall Rules**  
 
-Adapt this example firewall configuration file [`example-config-files/etc/config/firewall`](example-config-files/etc/config/firewall).
+Adapt [this example firewall configuration file](example-config-files/etc/config/firewall) as needed.
 
 The example firewall configuration:
 
@@ -81,7 +81,7 @@ The example firewall configuration:
 ---
 
 ### **Step 3: Configure IGMPproxy**  
-Edit `/etc/config/igmpproxy` to configure the **upstream & downstream networks** that will be allowed to proxy multicast traffic:  
+Edit [`/etc/config/igmpproxy`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/config/igmpproxy) to configure the **upstream & downstream networks** that will be allowed to proxy multicast traffic:  
 
 
 > [!NOTE]
@@ -116,13 +116,10 @@ config phyint
 
 ### **Step 4 Update The IGMPproxy Launch Script**
 
-
-
-For security, OpenWRT's default `/etc/init.d/igmpproxy` launch script creates a hidden firewall rule that blocks all UDP uPnP multicast traffic on 239.255.255.250, however for Sonos discovery across VLANs we need to remove this restriction. [This patched IGMPproxy launch script](https://raw.githubusercontent.com/itiligent/Sonos-OpenWRT-VLANs/refs/heads/main/example-config-files/etc/init.d/igmpproxy) allows multicast UDP forwarding on 239.255.255.250 as well as selctively preventing Windows WS-Discovery and Avahi muticast from clashing. The exact changes are below: 
+For security, OpenWRT's default `/etc/init.d/igmpproxy` launch script creates a hidden firewall rule that blocks all UDP uPnP multicast traffic on 239.255.255.250, however for Sonos discovery across VLANs we need to remove this restriction. [This replacement `/etc/init.d/igmpproxy` launch script](https://raw.githubusercontent.com/itiligent/Sonos-OpenWRT-VLANs/refs/heads/main/example-config-files/etc/init.d/igmpproxy) allows multicast UDP forwarding on 239.255.255.250 as well as selctively preventing Windows WS-Discovery and Avahi muticast from clashing. The exact changes from the default installed file are shown below: 
 
 ```
 # Allow select multicast
-
         json_add_object ""
         json_add_string type rule
         json_add_string src "$upstream"
@@ -145,7 +142,6 @@ igmp_add_firewall_network() {
         # 224.0.0.251 = mDNS
         # 224.0.0.252 = LLMNR
         # These are handled locally / by Avahi and must not be proxied.
- 
         json_add_object ""
         json_add_string type rule
         json_add_string src "$zone"
@@ -183,7 +179,7 @@ igmp_add_firewall_network() {
 ---
 
 ### **Step 5: Configure Avahi For mDNS & Apple Airplay Device Discovery**
-Edit `/etc/avahi/avahi-daemon.conf` as follows:  
+Edit [`/etc/avahi/avahi-daemon.conf`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/avahi/avahi-daemon.conf) as follows:  
 _Note: The `allow-interfaces` directive must be used to restrict mDNS access to just the required internal networks._
 
 ```ini
@@ -221,9 +217,9 @@ Because a router is typically powered on 24/7, hosting your music library **dire
 
 To set this up, install the **Samba** and **WSDD2** packages, then follow [this YouTube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for instructions on sharing a USB drive through Samba on OpenWrt.
 
-The attached [example configuration file](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/samba/smb.conf.template) includes a working **read-only guest music share**. 
+The attached [example smb.conf.template file](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/samba/smb.conf.template) includes settings for a **read-only guest music share**. 
 
-The below firewall rules are required to allow Sonos devices and application access to the OpenWrt smb share**.
+The below firewall rules are required to allow both Sonos devices and application access to the OpenWRT smb music share**.
 
 ```
 config rule
