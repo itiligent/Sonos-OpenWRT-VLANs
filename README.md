@@ -221,7 +221,7 @@ Because a router is typically powered on 24/7, hosting your music library **dire
 
 To set this up, install the **Samba** and **WSDD2** packages, then follow [this YouTube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for instructions on sharing a USB drive through Samba on OpenWrt.
 
-The attached example configuration files include a working **read-only guest music share**, along with the required **firewall rules to allow SMB access to the OpenWrt router**.
+The attached [example configuration file](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/samba/smb.conf.template) includes a working **read-only guest music share**, along with the required **firewall rules to allow SMB access to the OpenWrt router**.
 
 
 
