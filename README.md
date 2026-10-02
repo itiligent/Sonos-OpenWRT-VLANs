@@ -1,6 +1,6 @@
 ## 🎵 **Sonos with multiple VLANs (2027)**
 
-### 📋 **Sonos commuication across OpenWRT VLANs needs the following items:** 
+### 📋 **Sonos communication across OpenWRT VLANs needs:** 
 
 - 🔄 Avahi (mDNS)
 - 🌐 IGMPProxy
