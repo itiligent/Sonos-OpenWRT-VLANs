@@ -1,73 +1,101 @@
-config interface 'loopback'
-        option device 'lo'
-        option proto 'static'
-        option ipaddr '127.0.0.1'
-        option netmask '255.0.0.0'
+##############################################################################################
+# This example is for a regular 5 port router
+# A single VLAN enabled bridge is establishd with tagged interfaces and mapped physical ports
+##############################################################################################
 
-# Single VLAN-aware bridge.
+##################################
+# Set up a VLAN-aware main bridge.
+##################################
 config device
         option name 'br-lan'
         option type 'bridge'
-        option ipv6 '0'
         option bridge_empty '1'
         option stp '1'
-        option igmp_snooping '0'
         list ports 'eth0'
         list ports 'eth1'
         list ports 'eth2'
         list ports 'eth3'
         list ports 'eth4'
-        list ports 'eth5'
-        list ports 'eth6'
-        list ports 'eth7'
-        list ports 'eth8'
+
+####################################################
+# Set up remaining bridge devices for Guest and IoT
+####################################################
+
+config device
+        option type 'bridge'
+        option name 'br-guest'
+        option stp '1'
+        option bridge_empty '1'
+
+config device
+        option type 'bridge'
+        option name 'br-iot'
+        option stp '1'
+        option ipv6 '0'
+        option bridge_empty '1'
+
+####################################################
+# Configure and VLAN tag interfaces
+####################################################
 
 config interface 'lan'
         option device 'br-lan.100'
         option proto 'static'
         option ipaddr '192.168.1.1'
         option netmask '255.255.255.0'
-        option ipv6 '0'
-        option delegate '0'
-
+   
 config interface 'guest'
         option device 'br-lan.200'
         option proto 'static'
         option ipaddr '192.168.2.1'
         option netmask '255.255.255.0'
-        option ipv6 '0'
-        option delegate '0'
 
 config interface 'iot'
         option device 'br-lan.300'
         option proto 'static'
         option ipaddr '192.168.3.1'
         option netmask '255.255.255.0'
-        option ipv6 '0'
-        option delegate '0'
 
+config interface 'loopback'
+        option device 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+####################################################
+# Configure wan as appropriate. Currently tagged  as
+# br-lan.50 for VLAN 50. WAN VLAN tag is either 
+# optional or ISP specific.
+####################################################
+
+config interface 'wan_dhcp'
+        option proto 'dhcp'
+        option device 'br-lan.50'
+        option multipath 'off'
+
+####################################################
+# Configure phyical switch ports
+####################################################
+
+# Example adds switch ports eth0 and eth1 to LAN VLAN100. Sets VLAN trunk eth4 
 config bridge-vlan
         option device 'br-lan'
         option vlan '100'
         list ports 'eth0'
         list ports 'eth1'
-		list ports 'eth2'
-        list ports 'eth3'
-        list ports 'eth8:t'
+        list ports 'eth4:t'
 
+# Example adds switch port eth2 to Guest VLAN200. Sets VLAN trunk eth4 
 config bridge-vlan
         option device 'br-lan'
         option vlan '200'
-		list ports 'eth4'
-        list ports 'eth5'
-        list ports 'eth8:t'
+		list ports 'eth2'
+        list ports 'eth4:t'
 
+# Example adds switch port eth3 to IoT VLAN300. Sets VLAN trunk eth4
 config bridge-vlan
         option device 'br-lan'
         option vlan '300'
-        list ports 'eth6'
-        list ports 'eth7'
-        list ports 'eth8:t'
-
-
+        list ports 'eth3'
+        list ports 'eth4:t'
 

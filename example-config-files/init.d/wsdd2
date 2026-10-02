@@ -1,0 +1,260 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+USE_PROCD=1
+
+. /lib/functions/network.sh
+
+
+###############################################################################
+# Configuration
+###############################################################################
+
+# OpenWrt logical network names on which wsdd2 should listen.
+
+WSD_NETWORKS="lan guest iot"
+
+
+###############################################################################
+# Start one wsdd2 instance on specified WSD_NETWORKS
+###############################################################################
+
+start_wsdd2_instance() {
+
+        local network="$1"
+        local smb_conf="$2"
+        local nb_parm="$3"
+        local wg_parm="$4"
+        local bi_parm="$5"
+        local ifname=""
+
+        network_get_device ifname "$network"
+
+        if [ -z "$ifname" ]; then
+                logger -p daemon.info -t wsdd2 \
+                        "unable to resolve device for network '$network'; skipping"
+                return 0
+        fi
+
+        procd_open_instance "$network"
+
+        procd_set_param command /usr/bin/wsdd2
+		# Set to ipv4 only
+		procd_append_param command -4
+
+        # Bind only to this specific network device.
+        procd_append_param command -i "$ifname"
+		
+		procd_set_param netdev "$ifname"
+
+        # Advertised computer name.
+        procd_append_param command -N "$nb_parm"
+
+        # Samba workgroup.
+        procd_append_param command -G "$wg_parm"
+
+        # Optional board metadata.
+        if [ -n "$bi_parm" ]; then
+                procd_append_param command -b "$bi_parm"
+        fi
+
+        # Automatically restart this instance if it exits unexpectedly.
+        procd_set_param respawn
+
+        # Monitor the active SMB configuration file.
+        procd_set_param file "$smb_conf"
+
+        procd_close_instance
+
+        logger -p daemon.info -t wsdd2 \
+                "started on $network ($ifname) as $nb_parm ($wg_parm)"
+}
+
+
+###############################################################################
+# Main service startup
+###############################################################################
+
+start_service() {
+
+        local SMB_CONF=""
+        local NB_PARM=""
+        local WG_PARM="WORKGROUP"
+        local BI_PARM=""
+        local retries=30
+        local network
+
+        ########################################################################
+        # Wait for Samba or ksmbd to become ready
+        ########################################################################
+
+        while [ "$retries" -gt 0 ]; do
+
+                # ksmbd
+                if [ -e /etc/ksmbd/ksmbd.conf ] &&
+                   [ -e /etc/init.d/ksmbd ] &&
+                   /etc/init.d/ksmbd running; then
+
+                        SMB_CONF="/etc/ksmbd/ksmbd.conf"
+                        break
+                fi
+
+                # Samba
+                if [ -e /etc/samba/smb.conf ]; then
+
+                        if [ -e /etc/init.d/samba4 ] &&
+                           /etc/init.d/samba4 running; then
+
+                                SMB_CONF="/etc/samba/smb.conf"
+                                break
+
+                        elif [ -e /etc/init.d/samba ] &&
+                             /etc/init.d/samba running; then
+
+                                SMB_CONF="/etc/samba/smb.conf"
+                                break
+                        fi
+                fi
+
+                retries=$((retries - 1))
+                sleep 1
+        done
+
+        [ -z "$SMB_CONF" ] && {
+                logger -p daemon.info -t wsdd2 \
+                        "Samba/ksmbd did not become ready after 30 seconds"
+                return 1
+        }
+
+        ########################################################################
+        # Determine WSD / NetBIOS computer name
+        ########################################################################
+
+		NB_PARM="$(
+				sed -n \
+						's/^[[:space:]]*netbios[[:space:]]*name[[:space:]]*=[[:space:]]*//Ip' \
+						"$SMB_CONF" |
+				head -n 1 |
+				sed 's/[[:space:]]*$//' |
+				tr 'a-z' 'A-Z'
+		)"
+
+        ########################################################################
+        # Fall back to system hostname
+        ########################################################################
+
+        if [ -z "$NB_PARM" ]; then
+                NB_PARM="$(
+                        sed 's/\..*//' /proc/sys/kernel/hostname |
+                        tr -d '\r\n' |
+                        tr 'a-z' 'A-Z'
+                )"
+        fi
+
+        ########################################################################
+        # Determine workgroup
+        ########################################################################
+
+        local wg_name
+
+        wg_name="$(
+                sed -n \
+                        's/^[[:space:]]*workgroup[[:space:]]*=[[:space:]]*//Ip' \
+                        "$SMB_CONF" |
+                head -n 1 |
+                tr -d '\r\n'
+        )"
+
+        [ -n "$wg_name" ] && WG_PARM="$wg_name"
+
+        ########################################################################
+        # Determine board identification advertised through WSD
+        ########################################################################
+
+        local board_vendor=""
+        local board_model=""
+        local board_sku=""
+
+        if [ -e /tmp/sysinfo/board_name ]; then
+
+                board_vendor="$(
+                        awk -F',' '{print $1}' /tmp/sysinfo/board_name |
+                        tr ' ' '_' |
+                        tr ',' '-' |
+                        tr -d '\r\n'
+                )"
+
+                board_sku="$(
+                        awk -F',' '{print $2}' /tmp/sysinfo/board_name |
+                        tr ' ' '_' |
+                        tr ',' '-' |
+                        tr -d '\r\n'
+                )"
+        fi
+
+        if [ -e /tmp/sysinfo/model ]; then
+
+                board_model="$(
+                        awk -F':' '{print $1}' /tmp/sysinfo/model |
+                        tr ' ' '_' |
+                        tr ',' '-' |
+                        tr -d '\r\n'
+                )"
+        fi
+
+        if [ -n "$board_vendor" ] && [ -n "$board_model" ]; then
+
+                if [ -n "$board_sku" ]; then
+                        BI_PARM="vendor:$board_vendor,model:$board_model,sku:$board_sku"
+                else
+                        BI_PARM="vendor:$board_vendor,model:$board_model"
+                fi
+        fi
+
+        ########################################################################
+        # Start wsdd2 on configured networks only
+        ########################################################################
+
+        network_flush_cache
+
+        for network in $WSD_NETWORKS; do
+
+                start_wsdd2_instance \
+                        "$network" \
+                        "$SMB_CONF" \
+                        "$NB_PARM" \
+                        "$WG_PARM" \
+                        "$BI_PARM"
+        done
+}
+
+
+###############################################################################
+# Service triggers
+###############################################################################
+
+service_triggers() {
+
+        local network
+
+        ########################################################################
+        # Reload wsdd2 when configuration affecting networking or SMB identity
+        # changes.
+        ########################################################################
+
+        procd_add_reload_trigger \
+                "dhcp" \
+                "system" \
+                "network" \
+                "samba" \
+                "samba4" \
+                "ksmbd"
+
+        ########################################################################
+        # Reload when one of the configured networks changes state.
+        ########################################################################
+
+        for network in $WSD_NETWORKS; do
+                procd_add_reload_interface_trigger "$network"
+        done
+}
