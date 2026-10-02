@@ -1,6 +1,8 @@
-# 🎵 **Configure Sonos & OpenWRT with multiple VLANs (2027)**
+## 🎵 **Configure Sonos & OpenWRT with multiple VLANs (2027)**
 
-### 📋 **Controlling Sonos between OpenWRT VLANs needs the following things:** 
+---
+
+### 📋 **Sonos between OpenWRT VLANs needs the following items:** 
 
 - 🔄 Avahi (mDNS)
 - 🌐 IGMProxy
@@ -8,7 +10,7 @@
      - Facilitate Sonos multicast discovery between VLANs
      - Facilitate bi-directional unicast traffic between Speakers & Controller App located in separate VLANs 
 
-### 🛠️ Core Networking Elements Sonos Needs
+### 🛠️ Sonos Core Networking Needs
 
 | Function | Address / port | Multi-VLAN Approach |
 |---|---|---|
@@ -48,7 +50,7 @@
 
 
 
-## 🚀 **Step-by-Step Configuration**  
+## 🚀 **Step-by-Step OWRT Configuration**  
 
 ### **Step 1: Install IGMPproxy & Avahi** 
 The below packages are needed:
@@ -178,9 +180,9 @@ igmp_add_firewall_network() {
 ```
 ---
 
-### **Step 5: Configure Avahi For mDNS & Apple Airplay Device Discovery**
+### **Step 5: Configure Avahi For mDNS Discovery & Apple Airplay**
 Edit [`/etc/avahi/avahi-daemon.conf`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/avahi/avahi-daemon.conf) as follows:  
-_Note: The `allow-interfaces` directive must be used to restrict mDNS access to just the required internal networks._
+Note: The `allow-interfaces` directive must be used to restrict mDNS access to just the required internal networks.
 
 ```ini
 [server]
@@ -215,7 +217,7 @@ rlimit-nproc=3
 ### **Step 6: [Optional] Samba Music Library Share** 
 Because a router is typically powered on 24/7, hosting your music library **directly from the OpenWrt router** provides a simple, low-power way to keep your collection continuously available on the network.
 
-To set this up, install the **Samba** and **WSDD2** packages, then follow [this YouTube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for instructions on sharing a USB drive through Samba on OpenWrt.
+To set this up, install `samba4-server luci-app-samba4 wsdd2` packages, then follow [this YouTube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for instructions on sharing a USB drive through Samba on OpenWrt.
 
 The attached [example smb.conf.template file](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/samba/smb.conf.template) includes settings for a **read-only guest music share**. 
 
