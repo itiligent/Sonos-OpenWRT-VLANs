@@ -1,3 +1,0 @@
-# Refresh WSDD2 browse list hourly
-0 * * * * /etc/init.d/wsdd2 restart
-
