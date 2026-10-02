@@ -1,7 +1,5 @@
 ## 🎵 **Configure Sonos & OpenWRT with multiple VLANs (2027)**
 
----
-
 ### 📋 **Sonos between OpenWRT VLANs needs the following items:** 
 
 - 🔄 Avahi (mDNS)
