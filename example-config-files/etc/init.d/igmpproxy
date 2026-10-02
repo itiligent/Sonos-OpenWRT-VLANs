@@ -72,7 +72,6 @@ igmp_add_firewall_routing() {
         fi
 
 # Allow select multicast
-
         json_add_object ""
         json_add_string type rule
         json_add_string src "$upstream"
