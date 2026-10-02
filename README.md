@@ -221,9 +221,35 @@ Because a router is typically powered on 24/7, hosting your music library **dire
 
 To set this up, install the **Samba** and **WSDD2** packages, then follow [this YouTube tutorial](https://www.youtube.com/watch?v=asN9aZ6Fg00) for instructions on sharing a USB drive through Samba on OpenWrt.
 
-The attached [example configuration file](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/samba/smb.conf.template) includes a working **read-only guest music share**, along with the required **firewall rules to allow SMB access to the OpenWrt router**.
+The attached [example configuration file](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/samba/smb.conf.template) includes a working **read-only guest music share**. 
 
+The below firewall rules are required to allow Sonos devices and application access to the OpenWrt smb share**.
 
+```
+config rule
+        option name 'Allow-SMB-LAN-to-Router'
+        option family 'ipv4'
+        option src 'lan'
+        option proto 'tcp'
+        option dest_port '445'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-SMB-GUEST-to-Router'
+        option family 'ipv4'
+        option src 'guest'
+        option proto 'tcp'
+        option dest_port '445'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-SMB-IOT-to-Router'
+        option family 'ipv4'
+        option src 'iot'
+        option proto 'tcp'
+        option dest_port '445'
+        option target 'ACCEPT'
+```
 
 ### **Step 11: [Optional] Additional Persistent Disk Storage**
 For OpenWRT on x86, the most reliable way to add persistent music storage is to create a separate EXT4-formatted vdisk and auto-mount it via /etc/fstab. To ensure persistence across firmware resets or upgrades, bake your modified /etc/fstab into a custom firmware image. This prevents the extra EXT4 partition from being lost upon firmware resets or upgrades. See here for more on adding additional partitions to OpenWRT: [https://github.com/itiligent/Easy-OpenWRT-Builder](https://github.com/itiligent/Easy-OpenWRT-Builder?tab=readme-ov-file#-persistent-filesystem-expansion-without-resizing-partitions)    
