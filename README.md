@@ -241,8 +241,18 @@ config rule
 	option target 'ACCEPT'
 ```
 
+### **Step 7: Update OpenWRT backup selection**
 
-### **Step 7: [Optional] Additional Persistent Disk Storage**
+Update /etc/sysupgrade.conf to include your specfic new additions.
+
+```
+/etc/hotplug.d/net/*multicast*
+/etc/hotplug.d/iface/*multicast*
+/etc/init.d/wsdd2
+```
+
+
+### **Step 8: [Optional] Additional Persistent Disk Storage**
 For  on x86, the most reliable way to add persistent music storage is to create a separate EXT4-formatted vdisk and auto-mount it via `/etc/fstab`. To ensure persistence across firmware resets or upgrades, you can bake your modified `/etc/fstab` into a custom firmware image. This permanently sets the extra EXT4 partition in place and prevents it from being lost upon firmware resets or upgrades. See here for more on adding additional partitions to : [https://github.com/itiligent/Easy--Builder](https://github.com/itiligent/Easy--Builder?tab=readme-ov-file#-persistent-filesystem-expansion-without-resizing-partitions)    
 
 ---
