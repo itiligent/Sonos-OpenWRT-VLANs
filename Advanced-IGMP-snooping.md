@@ -74,8 +74,9 @@ Then paste the script [`99-vlan-multicast`](https://github.com/itiligent/Sonos-O
 
 ```sh
 chmod +x /etc/hotplug.d/iface/99-vlan-multicast
+mkdir -p /etc/hotplug.d/net
+ln -s ../iface/99-vlan-multicast /etc/hotplug.d/net/99-vlan-multicast
 ```
-
 
 Now edit the settings at the top of `/etc/hotplug.d/iface/99-vlan-multicast`:
 
