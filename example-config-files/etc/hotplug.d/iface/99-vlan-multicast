@@ -1,22 +1,11 @@
 #!/bin/sh
-# OpenWrt: apply VLAN-aware multicast snooping after the LAN interface is up.
-# Edit the settings below for each router or AP.
-
-BRIDGE="br-lan"
-VLAN_IDS="100 200 300"
-DISABLED_VLAN_IDS=""     # Optional VLANs with snooping and querier explicitly disabled, e.g. 2 12
-TRIGGER_INTERFACE="lan"  # OpenWrt logical interface name (not the bridge device)
-ROLE="primary"           # primary = IGMP querier; ap = snooping only
-TRUNKS=""                # Optional space-separated trunks, e.g. "eth1 eth2 eth3"
-
-#!/bin/sh
 # OpenWrt VLAN multicast settings, reapplied after relevant network events.
 
 BRIDGE="br-lan"
-VLAN_IDS="100 200 300"
-DISABLED_VLAN_IDS=""     # Keep this list in sync with configured bridge VLANs.
+VLAN_IDS="9 10 11"
+DISABLED_VLAN_IDS="2 12"   # Keep this list in sync with configured bridge VLANs.
 TRIGGER_INTERFACES="lan guest iot dmz"
-ROLE="primary"           # primary = IGMP querier; ap = snooping only
+ROLE="primary"            # primary = IGMP querier; ap = snooping only
 TRUNKS="eth1"
 
 SETTLE_DELAY=2

@@ -1,0 +1,83 @@
+#!/bin/sh
+# Router1: reconcile AWS access after WAN state/address changes.
+# Install as /etc/hotplug.d/iface/98-aws-fw.
+# Manual/cron trigger: /bin/sh /etc/hotplug.d/iface/98-aws-fw apply
+
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+UPDATE_SCRIPT="/root/scripts/aws-fw-update.sh"
+LOG_FILE="/tmp/aws-fw-update.log"
+RUN_DIR="/tmp/aws-fw-hotplug"
+MIN_UPTIME=60
+SETTLE_DELAY=5
+
+log_message() {
+    logger -t aws-fw "$*"
+}
+
+if [ "${1:-}" = "apply" ]; then
+    EVENT_DESCRIPTION="manual/periodic request"
+else
+    case "${INTERFACE:-}" in
+        wan|wan_dhcp|wan_usb|wan_tether) ;;
+        *) exit 0 ;;
+    esac
+
+    case "${ACTION:-}" in
+        ifup|ifdown|connected|disconnected) ;;
+        ifupdate)
+            [ "${IFUPDATE_ADDRESSES:-0}" = "1" ] || exit 0
+            ;;
+        *) exit 0 ;;
+    esac
+    EVENT_DESCRIPTION="ACTION=$ACTION INTERFACE=$INTERFACE"
+fi
+
+if ! command -v flock >/dev/null 2>&1; then
+    log_message "ERROR: flock is required; no AWS update started"
+    exit 1
+fi
+if [ ! -x "$UPDATE_SCRIPT" ]; then
+    log_message "ERROR: updater is not executable: $UPDATE_SCRIPT"
+    exit 1
+fi
+
+umask 077
+mkdir -p "$RUN_DIR" || exit 1
+REQUEST_ID="$$"
+REQUEST_FILE="$RUN_DIR/request"
+if ! printf '%s\n' "$REQUEST_ID" > "$REQUEST_FILE.$$" ||
+   ! mv -f "$REQUEST_FILE.$$" "$REQUEST_FILE"; then
+    log_message "ERROR: could not record AWS update request"
+    exit 1
+fi
+
+# Each event gets an asynchronous waiter. The newest pending request runs;
+# older queued requests exit after acquiring the lock. An event arriving
+# during an update remains queued for afterwards instead of being discarded.
+# Keep the lock file: flock state is released when its descriptors close.
+(
+    flock -x 9 || exit 1
+    [ "$(cat "$REQUEST_FILE" 2>/dev/null)" = "$REQUEST_ID" ] || exit 0
+
+    uptime_seconds=$(awk '{print int($1)}' /proc/uptime 2>/dev/null)
+    case "$uptime_seconds" in ''|*[!0-9]*) uptime_seconds=0 ;; esac
+    if [ "$uptime_seconds" -lt "$MIN_UPTIME" ]; then
+        sleep "$((MIN_UPTIME - uptime_seconds))"
+    fi
+    sleep "$SETTLE_DELAY"
+    [ "$(cat "$REQUEST_FILE" 2>/dev/null)" = "$REQUEST_ID" ] || exit 0
+
+    # No binding to the triggering WAN/device: routing selects the current
+    # working egress. Configure mwan3 local_source for router-originated traffic.
+    log_message "Reconciling AWS settings after $EVENT_DESCRIPTION"
+    if "$UPDATE_SCRIPT" >> "$LOG_FILE" 2>&1; then
+        log_message "AWS update completed"
+    else
+        result=$?
+        log_message "AWS update failed (exit $result); see $LOG_FILE"
+    fi
+) 9>"$RUN_DIR/lock" </dev/null >/dev/null 2>&1 &
+
+exit 0
