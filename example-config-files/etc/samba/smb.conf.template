@@ -1,0 +1,74 @@
+[global]
+    # Basic Server Settings
+    netbios name = router2
+    server string = router2.lan
+    workgroup = WORKGROUP
+    unix charset = UTF-8
+    server role = standalone server
+
+    # Network & Interface
+    interfaces = lo br-lan.100 br-lan.200 br-lan.300
+    bind interfaces only = yes
+    ntlm auth = ntlmv2-only
+    server min protocol = SMB2
+    server max protocol = SMB3
+    smb ports = 445
+    enable core files = no
+    host msdfs = no
+    disable netbios = yes
+    mdns name = netbios
+	
+    # Security & Authentication
+    security = user
+    passdb backend = smbpasswd
+    map to guest = Bad User
+    guest account = nobody
+    invalid users = root
+	
+    # Directory visibility
+    browseable = yes
+    access based share enum = yes
+    hide unreadable = no
+
+    # General defaults
+    guest ok = no
+    read only = yes
+    create mask = 0666
+    directory mask = 0777
+    deadtime = 15
+    load printers = no
+    printcap name = /dev/null
+    disable spoolss = yes
+    printing = bsd
+    veto files = /Thumbs.db/.DS_Store/._.DS_Store/.apdisk/lost+found/
+    delete veto files = yes
+
+####################################################################
+# SHARES
+####################################################################
+
+# Guest share needs no user created with smbpasswd
+[Music]
+    path = /mnt/sdb1/music
+    guest ok = yes
+    read only = yes
+    force user = root
+    force group = root
+    hosts allow = 127.0.0.1 192.168.1.0/24 192.168.2.0/24 192.168.3.0/24
+    hosts deny = ALL
+    vfs objects = io_uring
+
+# User speficic share limited to user created with smbpasswd & network ACL
+[example]
+    path = /path
+    valid users = david
+    guest ok = no
+    read only = no
+    force user = root
+    force group = root
+    hosts allow = 127.0.0.1 192.168.1.0/24
+    hosts deny = ALL
+    vfs objects = io_uring
+
+# OpenWrt appends generated global settings below this point.
+[global]

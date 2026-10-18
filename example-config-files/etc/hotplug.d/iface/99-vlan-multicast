@@ -1,0 +1,158 @@
+#!/bin/sh
+# OpenWrt VLAN multicast settings, reapplied after relevant network events.
+
+BRIDGE="br-lan"
+VLAN_IDS="100 200 300"
+DISABLED_VLAN_IDS=""
+TRIGGER_INTERFACES="lan guest iot dmz"
+ROLE="primary"
+TRUNKS="eth1 eth2"     # Optional space-separated list of trunk ports to downstream OpenWRT APs. Leave empty if no downstream trunks.
+
+SETTLE_DELAY=2
+RETRY_DELAY=2
+MAX_ATTEMPTS=15
+SYSFS="/sys/class/net"
+RUN_DIR="/var/run/vlan-mcast"
+
+MANUAL=0
+if [ "${1:-}" = "apply" ]; then
+    MANUAL=1
+else
+    case "${ACTION:-}" in
+        ifup|ifupdate|iflink|reload)
+            [ -n "${INTERFACE:-}" ] || exit 0
+            case " $TRIGGER_INTERFACES " in
+                *" $INTERFACE "*) ;;
+                *) exit 0 ;;
+            esac
+            ;;
+        add|move|bind)
+            EVENT_DEVICE="${DEVICENAME:-${INTERFACE:-}}"
+            [ -n "$EVENT_DEVICE" ] || exit 0
+            case "$EVENT_DEVICE" in
+                "$BRIDGE"|"$BRIDGE".*) ;;
+                *)
+                    case " $TRUNKS " in
+                        *" $EVENT_DEVICE "*) ;;
+                        *) exit 0 ;;
+                    esac
+                    ;;
+            esac
+            ;;
+        *) exit 0 ;;
+    esac
+fi
+
+log_message() {
+    logger -t mcast-vlan "$*"
+    if [ "$MANUAL" -eq 1 ]; then
+        printf '%s\n' "$*"
+    fi
+}
+
+case "$ROLE" in
+    primary) QUERIER=1 ;;
+    ap)      QUERIER=0 ;;
+    *) log_message "ERROR: ROLE must be primary or ap"; exit 1 ;;
+esac
+
+for VID in $DISABLED_VLAN_IDS; do
+    case " $VLAN_IDS " in
+        *" $VID "*)
+            log_message "ERROR: VLAN $VID is both enabled and disabled"
+            exit 1
+            ;;
+    esac
+done
+
+apply_settings() {
+    if [ ! -d "$SYSFS/$BRIDGE/bridge" ]; then
+        LAST_ERROR="bridge $BRIDGE is not ready"
+        return 1
+    fi
+    for PORT in $TRUNKS; do
+        if [ ! -d "$SYSFS/$PORT/brport" ]; then
+            LAST_ERROR="trunk $PORT is not an active bridge port"
+            return 1
+        fi
+        case "$(readlink "$SYSFS/$PORT/brport/bridge" 2>/dev/null)" in
+            */"$BRIDGE") ;;
+            *) LAST_ERROR="trunk $PORT is not attached to $BRIDGE"; return 1 ;;
+        esac
+    done
+
+    if ! ip link set dev "$BRIDGE" type bridge mcast_vlan_snooping 1 2>/dev/null; then
+        LAST_ERROR="cannot enable VLAN-aware snooping on $BRIDGE"
+        return 1
+    fi
+    for VID in $VLAN_IDS; do
+        if ! bridge vlan global set dev "$BRIDGE" vid "$VID" \
+            mcast_snooping 1 mcast_querier "$QUERIER" mcast_igmp_version 2 \
+            2>/dev/null; then
+            LAST_ERROR="cannot configure VLAN $VID on $BRIDGE"
+            return 1
+        fi
+        for PORT in $TRUNKS; do
+            if ! bridge vlan set dev "$PORT" vid "$VID" mcast_router 2 2>/dev/null; then
+                LAST_ERROR="cannot configure VLAN $VID on trunk $PORT"
+                return 1
+            fi
+        done
+    done
+    for VID in $DISABLED_VLAN_IDS; do
+        if ! bridge vlan global set dev "$BRIDGE" vid "$VID" \
+            mcast_snooping 0 mcast_querier 0 2>/dev/null; then
+            LAST_ERROR="cannot disable snooping/querier on VLAN $VID on $BRIDGE"
+            return 1
+        fi
+    done
+    return 0
+}
+
+# A newer event replaces this token atomically. Older pending retries then stop.
+# This is not a persistent lock: an abandoned token cannot block another run.
+umask 077
+if ! mkdir -p "$RUN_DIR"; then
+    log_message "ERROR: cannot create runtime directory $RUN_DIR"
+    exit 1
+fi
+REQUEST_FILE="$RUN_DIR/$BRIDGE.request"
+REQUEST_ID="$$"
+if ! printf '%s\n' "$REQUEST_ID" > "$REQUEST_FILE.$$" ||
+    ! mv -f "$REQUEST_FILE.$$" "$REQUEST_FILE"; then
+    log_message "ERROR: cannot record multicast reapplication request"
+    exit 1
+fi
+
+is_current_request() {
+    [ "$(cat "$REQUEST_FILE" 2>/dev/null)" = "$REQUEST_ID" ]
+}
+
+apply_with_retry() {
+    sleep "$SETTLE_DELAY"
+    ATTEMPT=1
+    while [ "$ATTEMPT" -le "$MAX_ATTEMPTS" ]; do
+        is_current_request || return 0
+        if apply_settings; then
+            is_current_request || return 0
+            log_message "Applied: bridge=$BRIDGE role=$ROLE querier=$QUERIER vlans=[$VLAN_IDS] disabled=[$DISABLED_VLAN_IDS] trunks=[${TRUNKS:-none}] attempt=$ATTEMPT"
+            return 0
+        fi
+        ATTEMPT=$((ATTEMPT + 1))
+        if [ "$ATTEMPT" -le "$MAX_ATTEMPTS" ]; then
+            sleep "$RETRY_DELAY"
+        fi
+    done
+    is_current_request || return 0
+    log_message "ERROR: failed after $MAX_ATTEMPTS attempts: $LAST_ERROR"
+    return 1
+}
+
+if [ "$MANUAL" -eq 1 ]; then
+    apply_with_retry
+    exit $?
+fi
+
+# Keep hotplug processing responsive while waiting for the bridge and VLANs.
+( apply_with_retry ) </dev/null >/dev/null 2>&1 &
+exit 0
