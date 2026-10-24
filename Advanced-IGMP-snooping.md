@@ -121,7 +121,7 @@ nano /etc/hotplug.d/iface/99-vlan-multicast
 
 Copy the contents of **[`99-vlan-multicast`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/main/example-config-files/etc/hotplug.d/iface/99-vlan-multicast)** into the new `99-vlan-multicast` file and save it.
 
-Make the script executable, then optionally create a symlink for additional hotplug event coverage:
+Make the script executable, then create a symlink for additional hotplug event coverage:
 
 ```sh
 chmod +x /etc/hotplug.d/iface/99-vlan-multicast
