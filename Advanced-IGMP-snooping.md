@@ -119,7 +119,7 @@ This enables bridge-level IGMP snooping while leaving the **bridge-global querie
 nano /etc/hotplug.d/iface/99-vlan-multicast
 ```
 
-Copy the contents of **[`99-vlan-multicast`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/main/example-config-files/etc/hotplug.d/iface/99-vlan-multicast)** into the file and save it.
+Copy the contents of **[`99-vlan-multicast`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/main/example-config-files/etc/hotplug.d/iface/99-vlan-multicast)** into the new `99-vlan-multicast` file and save it.
 
 Make the script executable, then optionally create a symlink for additional hotplug event coverage:
 
