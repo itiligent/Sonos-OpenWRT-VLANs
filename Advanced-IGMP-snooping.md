@@ -86,7 +86,7 @@ bridge vlan show
 The first command must return **`1`**. The second command should show the configured VLANs on the relevant bridge ports.
 
 > [!NOTE]
-> This guide assumes that VLAN membership, tagging and trunk connectivity already work.
+> This guide assumes that VLAN membership, tagging and trunk connectivity are all configured and working correctly.
 
 ---
 
