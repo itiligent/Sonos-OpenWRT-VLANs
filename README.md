@@ -66,9 +66,6 @@ The repository includes [example configuration files](example-config-files) prov
 - Sonos speakers have addresses assigned within a **contiguous static IP range**. Static DHCP reservations are recommended; this example uses the `192.168.3.16/28` address block.
 - Root access over SSH is available to the OpenWRT router.
 
-> [!TIP]
-> The configuration snippets use interfaces `br-lan.100`, `br-lan.200`, and `br-lan.300`. Replace these names and the example addresses with the values used by your network.
-
 ---
 
 ## Step-by-step configuration
@@ -170,7 +167,7 @@ rlimit-nproc=3
 
 IGMP snooping is optional. Choose the approach appropriate for your topology and multicast traffic.
 
-#### **Typical home networks: Leave snooping unconfigured**
+### **Typical home networks: Leave snooping unconfigured**
 
 For a typical home deployment, IGMP snooping is not required. Leave the OpenWRT settings in their default, unconfigured state; SMCRoute handles the multicast routing needed for this setup.
 
@@ -188,20 +185,17 @@ For a typical home deployment, IGMP snooping is not required. Leave the OpenWRT 
 >
 > Unexpected `1` values may require corrective configuration. See [Disable Wi-Fi multicast-to-unicast conversion](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/main/Advanced-IGMP-snooping.md#step-3-disable-wi-fi-multicast-to-unicast-conversion) in the advanced guide.
 
-#### **Larger or advanced networks: Consider per-VLAN snooping**
+### **Larger or advanced networks: Consider per-VLAN snooping**
 
 For networks with significant multicast traffic and several VLANs trunked to downstream OpenWRT access points, IGMP snooping can reduce unnecessary multicast delivery by restricting traffic to ports with interested receivers.
 
 > [!IMPORTANT]
-> When multiple OpenWRT access points are interconnected over VLAN trunks, **configure IGMP snooping individually for each VLAN** to maintain correct multicast forwarding.
->
-> For this topology, **do not rely on LuCI or UCI alone** to configure IGMP snooping. Those interfaces do not expose all required bridge and per-VLAN settings.
->
-> Refer to the [Advanced IGMP Snooping Guide](Advanced-IGMP-snooping.md) for the detailed configuration procedure.
+> For this topology, **do not rely on LuCI or UCI alone** to configure IGMP snooping. Those interfaces do not expose all required bridge and per-VLAN settings. For access points using VLAN trunks, **IGMP snooping must be configured individually for each VLAN**.
+>> Refer to the [Advanced IGMP Snooping Guide](Advanced-IGMP-snooping.md) for the detailed configuration procedure.
 
 ### 6. Optional: Host a Samba music library
 
-A router that operates continuously can also provide a low-power, always-available Samba music library for Sonos.
+An always-on router can also provide a low-power, always-available Samba music library for Sonos.
 
 Install the [optional Samba packages](#1-install-smcroute-and-avahi), then follow this [tutorial on sharing a USB drive through Samba on OpenWRT](https://www.youtube.com/watch?v=asN9aZ6Fg00).
 
@@ -281,15 +275,15 @@ config rule
         option target 'ACCEPT'
 ```
 
-### 7. Preserve configuration during upgrades
+### 7. Include custom configuration changes in OpenWRT backups/upgrades
 
-Update `/etc/sysupgrade.conf` to include the custom multicast hotplug scripts and WSDD2 startup script:
+Update `/etc/sysupgrade.conf` to include any new custom configuration scripts:
 
 ```text
-# For optional Windows Discovery
+# If optional multi VLAN interface Windows Discovery was added:
 /etc/init.d/wsdd2
 
-# For optional per-VLAN IGMP Snooping settings 
+# If optional per-VLAN IGMP Snooping was added: 
 /etc/hotplug.d/iface/*multicast*
 /etc/hotplug.d/net/*multicast*
 ```
