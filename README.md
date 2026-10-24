@@ -171,7 +171,7 @@ IGMP snooping is optional. Choose the approach appropriate for your topology and
 
 For a typical home deployment, IGMP snooping is not required. Leave the OpenWRT settings in their default, unconfigured state; SMCRoute handles the multicast routing needed for this setup.
 
-> [!IMPORTANT]
+> [!WARNING]
 > Some OpenWRT builds may leave Wi-Fi multicast-to-unicast conversion enabled despite the default configuration. This can contribute to Sonos lag, discovery problems, or dropouts.
 >
 > Check the active settings:
