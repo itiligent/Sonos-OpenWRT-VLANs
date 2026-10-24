@@ -289,7 +289,7 @@ Update `/etc/sysupgrade.conf` to include the custom multicast hotplug scripts an
 # For optional Windows Discovery
 /etc/init.d/wsdd2
 
-# For optioal per-VLAN IGMP Snooping settings 
+# For optional per-VLAN IGMP Snooping settings 
 /etc/hotplug.d/iface/*multicast*
 /etc/hotplug.d/net/*multicast*
 ```
