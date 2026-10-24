@@ -63,7 +63,7 @@ The repository includes [example configuration files](example-config-files) prov
 
 - OpenWrt v21.x or later is installed.
 - WAN access is available to all three example VLANs.
-- Sonos speakers have addresses assigned within a **contiguous static IP range**. Static DHCP reservations are recommended; for example, use the `192.168.3.16/28` address block.
+- Sonos speakers have addresses assigned within a **contiguous static IP range**. Static DHCP reservations are recommended; this example uses the `192.168.3.16/28` address block.
 - Root access over SSH is available to the OpenWrt router.
 
 > [!TIP]
