@@ -1,8 +1,8 @@
-# VLAN-Aware IGMP Snooping on OpenWrt
+# VLAN-Aware IGMP Snooping on OpenWRT
 
-A practical guide to configuring **per-VLAN IGMP snooping** on OpenWrt, with a **single IGMP querier on the primary router** and optional downstream access points (APs) connected over VLAN trunks.
+A practical guide to configuring **per-VLAN IGMP snooping** on OpenWRT, with a **single IGMP querier on the primary router** and optional downstream access points (APs) connected over VLAN trunks.
 
-The configuration uses Linux bridge multicast settings and OpenWrt hotplug scripts to keep multicast behaviour consistent across participating devices.
+The configuration uses Linux bridge multicast settings and OpenWRT hotplug scripts to keep multicast behaviour consistent across participating devices.
 
 > [!IMPORTANT]
 > **Use one designated IGMP querier per VLAN.** In this topology, the primary router provides the per-VLAN querier, while downstream APs perform IGMP snooping only. The bridge-global querier remains disabled on every device.
@@ -33,7 +33,7 @@ The following example uses three VLANs:
 | **IoT** | Smart-home and discovery devices | `300` |
 
 ```text
-                    Primary OpenWrt router
+                    Primary OpenWRT router
                    (Layer 3 + IGMP querier)
                           br-lan
                      VLANs 100/200/300
@@ -61,15 +61,15 @@ The primary router acts as the **designated IGMP querier for each participating 
 
 Before starting, confirm the following:
 
-- OpenWrt **25.12.x**, or another release with the required Linux bridge per-VLAN multicast features.
+- OpenWRT **25.12.x**, or another release with the required Linux bridge per-VLAN multicast features.
 - An existing Linux bridge (in this guide, `br-lan`) with **VLAN filtering enabled**.
 - VLANs `100`, `200` and `300` already configured on the relevant bridge ports.
-- One primary OpenWrt router and, optionally, one or more downstream OpenWrt APs connected by VLAN trunks.
+- One primary OpenWRT router and, optionally, one or more downstream OpenWRT APs connected by VLAN trunks.
 - Root/SSH access to every participating router or AP.
 
 ### Install the required utilities
 
-On **every participating OpenWrt device**, run:
+On **every participating OpenWRT device**, run:
 
 ```sh
 apk update
@@ -94,7 +94,7 @@ The first command must return **`1`**. The second command should show the config
 
 ### Step 1: Enable bridge-level IGMP snooping
 
-**Applies to:** All participating OpenWrt routers and APs.
+**Applies to:** All participating OpenWRT routers and APs.
 
 Edit the `br-lan` device section in `/etc/config/network` and ensure it includes:
 
@@ -111,7 +111,7 @@ This enables bridge-level IGMP snooping while leaving the **bridge-global querie
 
 ### Step 2: Install the per-VLAN multicast hotplug script
 
-**Applies to:** All participating OpenWrt routers and APs.
+**Applies to:** All participating OpenWRT routers and APs.
 
 #### 2.1 Create the script
 
@@ -133,7 +133,7 @@ The symlink allows the same script to handle **network-device events** as well a
 
 #### 2.2 Configure the script variables
 
-Edit the settings at the top of `/etc/hotplug.d/iface/99-vlan-multicast` to setting that suit your network, below is an example only:
+Edit the settings at the top of `/etc/hotplug.d/iface/99-vlan-multicast` to settings that suit your network, below is an example only:
 
 ```sh
 BRIDGE="br-lan"
@@ -149,12 +149,12 @@ TRUNKS="eth1 eth2"
 | `BRIDGE` | Linux bridge containing the VLANs, for example `br-lan`. |
 | `VLAN_IDS` | Space-separated VLAN IDs on which IGMP snooping should be enabled. |
 | `DISABLED_VLAN_IDS` | Optional VLAN IDs on which to explicitly disable **both** IGMP snooping and the IGMP querier. Leave empty if not needed. |
-| `TRIGGER_INTERFACE` | OpenWrt **logical interface** that generates `ifup` events, commonly `lan`. This may differ from the bridge device name. |
+| `TRIGGER_INTERFACE` | OpenWRT **logical interface** that generates `ifup` events, commonly `lan`. This may differ from the bridge device name. |
 | `ROLE` | `primary` enables the IGMP querier for the selected VLANs; `ap` disables the querier. |
 | `TRUNKS` | Space-separated **bridge-port** names used as VLAN trunks between devices. Leave empty if there are no trunks. |
 
 > [!IMPORTANT]
-> Every VLAN in `DISABLED_VLAN_IDS` must already exist and **must not** also appear in `VLAN_IDS`. The script logs an error and stops if the lists overlap.
+> Every VLAN in `DISABLED_VLAN_IDS` must already exist and **must not** also appear in `VLAN_IDS`. The script logs an error and stops if `VLAN_IDS` and `DISABLED_VLAN_IDS` lists conflict or overlap.
 
 #### 2.3 Select the appropriate device role
 
@@ -189,7 +189,7 @@ bridge vlan show
 ```
 
 > [!WARNING]
-> Use **actual bridge-port names** (such as `eth1` or `eth5`) for `TRUNKS`, not VLAN subinterfaces or OpenWrt logical network names. Each listed trunk must belong to `BRIDGE` and carry **all** VLANs listed in `VLAN_IDS`.
+> Use **actual bridge-port names** (such as `eth1` or `eth5`) for `TRUNKS`, not VLAN subinterfaces or OpenWRT logical network names. Each listed trunk must belong to `BRIDGE` and carry **all** VLANs listed in `VLAN_IDS`.
 
 
 #### 2.5 How the script operates
@@ -203,7 +203,7 @@ For each selected VLAN, it also marks every configured trunk as a **permanent mu
 **Applies to:** Every participating device that hosts Wi-Fi interfaces.
 
 > [!WARNING]
-> Some OpenWrt builds may leave multicast-to-unicast enabled at runtime (`1`) even when the UCI configuration contains `option multicast_to_unicast '0'`. See [OpenWrt issue #23399](https://github.com/openwrt/openwrt/issues/23399).
+> Some OpenWRT builds may leave multicast-to-unicast enabled at runtime (`1`) even when the UCI configuration contains `option multicast_to_unicast '0'`. See [OpenWRT issue #23399](https://github.com/openWRT/openWRT/issues/23399).
 >
 > The additional hotplug script prevents the risk of incorrect behaviour by checking `/sys/class/net/<interface>/brport/multicast_to_unicast` and writing `0` where required.
 
@@ -255,7 +255,7 @@ The script responds to network-device `add`, `move` and `bind` events, waits bri
 
 ### Step 4: Allow IGMP to the primary router
 
-**Applies to:** Participating OpenWrt devices with an active firewall, IGMP must be permitted to reach the router.
+**Applies to:** Participating OpenWRT devices with an active firewall, IGMP must be permitted to reach the router.
 
 Add the relevant rules to `/etc/config/firewall`, adapting the zone names to your configuration:
 
