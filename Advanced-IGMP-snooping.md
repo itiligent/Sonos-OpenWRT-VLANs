@@ -240,7 +240,7 @@ Create the hotplug script:
 nano /etc/hotplug.d/net/99-multicast-to-unicast-fix
 ```
 
-Copy the contents of **[`99-multicast-to-unicast-fix`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/main/example-config-files/etc/hotplug.d/net/99-multicast-to-unicast-fix)** into the file and save it.
+Copy the contents of **[`99-multicast-to-unicast-fix`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/main/example-config-files/etc/hotplug.d/net/99-multicast-to-unicast-fix)** into the new `99-multicast-to-unicast-fix` file and save it.
 
 Make it executable:
 
