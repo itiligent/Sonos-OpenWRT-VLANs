@@ -1,4 +1,4 @@
-# Sonos Across VLANs on OpenWrt
+# Sonos Across VLANs on OpenWRT
 
 **A practical configuration guide for Sonos discovery and control across segregated OpenWrt VLANs.**
 
