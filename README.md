@@ -49,7 +49,7 @@ To operate Sonos speakers and controller applications across VLANs, the network 
 
 ## Reference topology and prerequisites
 
-The repository includes [example configuration files](example-config-files) providing a baseline OpenWrt setup for a multi-VLAN Sonos deployment. Adapt them to your network rather than applying them unchanged.
+The repository includes [example configuration files](example-config-files) providing a baseline OpenWrt setup for a multi-VLAN Sonos deployment. Adapt them to your own network.
 
 ### Example VLANs
 
