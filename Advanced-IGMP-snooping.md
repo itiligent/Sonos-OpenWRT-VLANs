@@ -133,7 +133,7 @@ The symlink allows the same script to handle **network-device events** as well a
 
 #### 2.2 Configure the script variables
 
-Edit the settings at the top of `/etc/hotplug.d/iface/99-vlan-multicast`:
+Edit the settings at the top of `/etc/hotplug.d/iface/99-vlan-multicast` to setting that suit your network, below is an example only:
 
 ```sh
 BRIDGE="br-lan"
