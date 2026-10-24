@@ -1,11 +1,11 @@
 # Sonos Across VLANs on OpenWRT
 
-**A practical configuration guide for Sonos discovery and control across segregated OpenWrt VLANs.**
+**A practical configuration guide for Sonos discovery and control across segregated OpenWRT VLANs.**
 
 This guide uses **SMCRoute** for SSDP multicast routing, **Avahi** for mDNS reflection, and targeted **firewall rules** for the unicast traffic required between Sonos speakers and controller applications on different VLANs. Optional sections cover IGMP snooping, a Samba music library, Windows network discovery, and persistent storage.
 
 > [!NOTE]
-> The configurations below are examples. Adjust VLAN IDs, IP ranges, interface names, firewall zones, and package installation commands to match your OpenWrt environment.
+> The configurations below are examples. Adjust VLAN IDs, IP ranges, interface names, firewall zones, and package installation commands to match your OpenWRT environment.
 
 ## Contents
 
@@ -49,7 +49,7 @@ To operate Sonos speakers and controller applications across VLANs, the network 
 
 ## Reference topology and prerequisites
 
-The repository includes [example configuration files](example-config-files) providing a baseline OpenWrt setup for a multi-VLAN Sonos deployment. Adapt them to your own network.
+The repository includes [example configuration files](example-config-files) providing a baseline OpenWRT setup for a multi-VLAN Sonos deployment. Adapt them to your own network.
 
 ### Example VLANs
 
@@ -61,10 +61,10 @@ The repository includes [example configuration files](example-config-files) prov
 
 ### Assumptions
 
-- OpenWrt v21.x or later is installed.
+- OpenWRT v21.x or later is installed.
 - WAN access is available to all three example VLANs.
 - Sonos speakers have addresses assigned within a **contiguous static IP range**. Static DHCP reservations are recommended; this example uses the `192.168.3.16/28` address block.
-- Root access over SSH is available to the OpenWrt router.
+- Root access over SSH is available to the OpenWRT router.
 
 > [!TIP]
 > The configuration snippets use interfaces `br-lan.100`, `br-lan.200`, and `br-lan.300`. Replace these names and the example addresses with the values used by your network.
@@ -172,10 +172,10 @@ IGMP snooping is optional. Choose the approach appropriate for your topology and
 
 #### **Typical home networks: Leave snooping unconfigured**
 
-For a typical home deployment, IGMP snooping is not required. Leave the OpenWrt settings in their default, unconfigured state; SMCRoute handles the multicast routing needed for this setup.
+For a typical home deployment, IGMP snooping is not required. Leave the OpenWRT settings in their default, unconfigured state; SMCRoute handles the multicast routing needed for this setup.
 
 > [!IMPORTANT]
-> Some OpenWrt builds may leave Wi-Fi multicast-to-unicast conversion enabled despite the default configuration. This can contribute to Sonos lag, discovery problems, or dropouts.
+> Some OpenWRT builds may leave Wi-Fi multicast-to-unicast conversion enabled despite the default configuration. This can contribute to Sonos lag, discovery problems, or dropouts.
 >
 > Check the active settings:
 >
@@ -190,10 +190,10 @@ For a typical home deployment, IGMP snooping is not required. Leave the OpenWrt 
 
 #### **Larger or advanced networks: Consider per-VLAN snooping**
 
-For networks with significant multicast traffic and several VLANs trunked to downstream OpenWrt access points, IGMP snooping can reduce unnecessary multicast delivery by restricting traffic to ports with interested receivers.
+For networks with significant multicast traffic and several VLANs trunked to downstream OpenWRT access points, IGMP snooping can reduce unnecessary multicast delivery by restricting traffic to ports with interested receivers.
 
 > [!IMPORTANT]
-> When multiple OpenWrt access points are interconnected over VLAN trunks, **configure IGMP snooping individually for each VLAN** to maintain correct multicast forwarding.
+> When multiple OpenWRT access points are interconnected over VLAN trunks, **configure IGMP snooping individually for each VLAN** to maintain correct multicast forwarding.
 >
 > For this topology, **do not rely on LuCI or UCI alone** to configure IGMP snooping. Those interfaces do not expose all required bridge and per-VLAN settings.
 >
@@ -203,7 +203,7 @@ For networks with significant multicast traffic and several VLANs trunked to dow
 
 A router that operates continuously can also provide a low-power, always-available Samba music library for Sonos.
 
-Install the [optional Samba packages](#1-install-smcroute-and-avahi), then follow this [tutorial on sharing a USB drive through Samba on OpenWrt](https://www.youtube.com/watch?v=asN9aZ6Fg00).
+Install the [optional Samba packages](#1-install-smcroute-and-avahi), then follow this [tutorial on sharing a USB drive through Samba on OpenWRT](https://www.youtube.com/watch?v=asN9aZ6Fg00).
 
 The example [`smb.conf.template`](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/samba/smb.conf.template) includes a **read-only guest music share**.
 
@@ -244,7 +244,7 @@ By default, WSDD2 advertises Samba shares for Windows Network discovery only on 
 To advertise shares on additional VLANs:
 
 1. Replace `/etc/init.d/wsdd2` with the [updated WSDD2 startup script](example-config-files/init.d/wsdd2).
-2. Near the top of the script, configure the OpenWrt network interfaces that should receive WSDD2 advertisements:
+2. Near the top of the script, configure the OpenWRT network interfaces that should receive WSDD2 advertisements:
 
    ```sh
    WSD_NETWORKS="lan guest iot"
@@ -296,7 +296,7 @@ Update `/etc/sysupgrade.conf` to include the custom multicast hotplug scripts an
 
 ### 8. Optional: Add persistent disk storage
 
-For **OpenWrt on x86**, a separate EXT4-formatted virtual disk mounted through `/etc/fstab` can provide persistent storage for a music library.
+For **OpenWRT on x86**, a separate EXT4-formatted virtual disk mounted through `/etc/fstab` can provide persistent storage for a music library.
 
 To preserve the storage configuration across firmware resets or upgrades, include the modified `/etc/fstab` in a custom firmware image. This retains the extra EXT4 partition's mount configuration across firmware changes.
 
@@ -306,7 +306,7 @@ For additional details, see [Persistent filesystem expansion without resizing pa
 
 ## Related resources
 
-- [Example OpenWrt configuration files](example-config-files)
+- [Example OpenWRT configuration files](example-config-files)
 - [Advanced IGMP Snooping Guide](Advanced-IGMP-snooping.md)
 - [SMCRoute example configuration](example-config-files/etc/smcroute.conf)
 - [Avahi example configuration](https://github.com/itiligent/Sonos-OpenWRT-VLANs/blob/beta/example-config-files/etc/avahi/avahi-daemon.conf)
